@@ -23,7 +23,7 @@ def show_image(I, title):
 	plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
 	plt.title(title)
 
-## calcolo MSE e SSIM
+## calcolo MSE, PSNR e SSIM
 def compare_images(imageA, imageB, tit1, tit2):
 	m = mean_squared_error(imageA, imageB)
 	p = cv2.PSNR(imageA, imageB)
