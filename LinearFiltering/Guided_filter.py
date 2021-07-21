@@ -113,7 +113,7 @@ if __name__ == "__main__":
 	#img = cv2.imread('peppers.png')  
 	#img = cv2.imread('caster-RGB.tif')
 	
-	## conversione immagine a double ##
+	## conversione immagine in double ##
 	if img.ndim == 2:
 		I = im2double(img) 
 	else:
