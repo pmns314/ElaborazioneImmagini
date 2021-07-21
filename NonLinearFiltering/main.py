@@ -11,7 +11,7 @@ from skimage.metrics import *
 
 if __name__ == '__main__':
 
-    image = cv2.imread('../images/cameraman.tif', cv2.IMREAD_GRAYSCALE)
+    image = cv2.imread('../images/b&w/cameraman.tif', cv2.IMREAD_GRAYSCALE)
     image = sk.img_as_float(image)
     N = 5
     p = 0.05

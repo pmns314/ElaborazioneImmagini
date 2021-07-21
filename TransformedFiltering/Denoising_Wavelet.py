@@ -64,7 +64,7 @@ def denoise(image, wname, levels, flag_show=None, title=None):
     return pywt.waverec2(coeff, wname)
 
 if __name__ == '__main__':
-    I = cv2.imread('../images/cameraman.tif', -1)
+    I = cv2.imread('../images/b&w/cameraman.tif', -1)
     I_noise = skimage.util.random_noise(I, 'gaussian')
     cv2.imshow('Noise', I_noise)
 

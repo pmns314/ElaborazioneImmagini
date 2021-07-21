@@ -114,7 +114,7 @@ def display(image, title=''):
 
 
 if __name__ == '__main__':
-    I = cv2.imread('../images/peppers.png', -1)
+    I = cv2.imread('../images/rgb/peppers.png', -1)
     I_noise = skimage.util.random_noise(I, 'gaussian')
     display(I_noise, 'Original with Noise')
 
