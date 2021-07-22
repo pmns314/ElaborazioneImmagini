@@ -8,9 +8,10 @@ import cv2
 import skimage.metrics
 
 
-def show_image_from_coefficients(coeffs, shape, title=None):
-    rows, cols = shape
-    C = np.ones([rows + int(np.ceil(math.log2(rows) / 2)), cols + int(np.ceil(math.log2(cols) / 2))])
+def show_image_from_coefficients(coeffs, title=None):
+    sh = coeffs[len(coeffs) - 1][0].shape
+
+    C = np.ones([sh[0] * 2, sh[1] * 2])
     dim_rows, dim_cols = coeffs[0].shape
     for i in range(len(coeffs)):
         if i == 0:
@@ -36,7 +37,7 @@ def get_threshold(image, wname):
     return thr
 
 
-def _plot_wavelet_transform(coeff, shape, title, ch, pre):
+def _plot_wavelet_transform(coeff, title, ch, pre):
     if pre is True:
         if title is None:
             title = 'Pre Denoising'
@@ -67,24 +68,29 @@ def _plot_wavelet_transform(coeff, shape, title, ch, pre):
             title = title + '- R'
         else:
             plt.subplot(122)
-    show_image_from_coefficients(coeff, shape, title)
+    show_image_from_coefficients(coeff, title)
 
 
 def _denoise(image, wname, levels, flag_show=None, title=None, ch=-1):
     # Wavelet Transform
     coeff = pywt.wavedec2(image, wname, level=levels)
+
     # Plot Wavelet Transform
     if flag_show is not None and flag_show[0] is True:
-        _plot_wavelet_transform(coeff, image.shape, None if title is None else title[0], ch, True)
+        _plot_wavelet_transform(coeff, None if title is None else title[0], ch, True)
+
     # Get Threshold
     thr = get_threshold(image, wname)
+
     # Denoising Wavelet Transform
     for i in range(1, len(coeff)):
         for imm in coeff[i]:
             imm[abs(imm) < thr] = 0
+
     # Plot Wavelet Tranform Denoised
     if flag_show is not None and flag_show[1] is True:
-        _plot_wavelet_transform(coeff, image.shape, None if title is None else title[1], ch, False)
+        _plot_wavelet_transform(coeff, None if title is None else title[1], ch, False)
+
     # Reconstruct Image
     return pywt.waverec2(coeff, wname)
 
@@ -116,17 +122,16 @@ def display(image, title=''):
 if __name__ == '__main__':
     I = cv2.imread('../images/rgb/peppers.png', -1)
     I_noise = skimage.util.random_noise(I, 'gaussian')
-    display(I_noise, 'Original with Noise')
-
-    # Trasformata Wavelet
-    wname = 'db3'
-    I_noise = skimage.img_as_float(I_noise)
-    levels = pywt.dwtn_max_level(I_noise.shape[:-1], wname)
-    channels = get_channels_number(I_noise)
     I = np.uint16(I)
 
+    display(I_noise, 'Original with Noise')
+    channels = get_channels_number(I_noise)
+
+    # Definizione dei parametri della trasformata wavelet
+    wname = 'sym5'
+    levels = pywt.dwtn_max_level(I_noise.shape[:-1], wname)
+
     print('Level : ', levels, '\n', end='\t\t')
-    levels = 3;
     # Denoise
     de_image = denoise(I_noise, wname, levels, channels, (True, True),
                        title=['Pre_denoise ' + str(levels), 'Post_denoise ' + str(levels)])
