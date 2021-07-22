@@ -41,6 +41,7 @@ def compare_images(imageA, imageB, tit1, tit2):
 	plt.title(tit2)
 	plt.imshow(imageB, cmap=plt.cm.gray)
 	plt.axis("off")
+    #ciaociao
 
 ## applicazione rumore
 def noisy(noise_typ,image):
