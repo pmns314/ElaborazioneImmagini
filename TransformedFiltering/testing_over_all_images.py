@@ -1,9 +1,6 @@
-import cv2
-
 from wavelet_denoising import *
 import os
 import warnings
-import skimage as sk
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import mean_squared_error
 from LinearFiltering.Guided_filter import im2double
@@ -22,7 +19,7 @@ def show_images(images, titles, channels=1):
     n = len(images)
     # plot immagine originale
     for i in range(1, n + 1):
-        fig.add_subplot(n // 2, n // 2, i)
+        fig.add_subplot(n//2, n//2, i)
         plt.title(titles[i - 1])
         image = cv2.normalize(images[i - 1], None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
         if channels == 1:
@@ -45,7 +42,7 @@ if __name__ == '__main__':
         I = cv2.imread(f)
 
         # Add Noise
-        I_noise = skimage.util.random_noise(I, 'poisson')
+        I_noise = skimage.util.random_noise(I, 'gaussian')
         channels = get_channels_number(I_noise)
 
         # Definizione Parametri
@@ -67,4 +64,4 @@ if __name__ == '__main__':
         print("\t\t\t\t\t\t MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f" % vals_neigh)
         print("\t\t\t\t\t\t MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f" % vals_univ)
         show_images([I, I_noise, de_image, de_image_neigh], ["Original", "Noise", "Univ", "Neigh"], channels)
-    plt.show()
+        plt.show()
