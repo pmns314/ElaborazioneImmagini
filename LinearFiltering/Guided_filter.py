@@ -30,7 +30,7 @@ def compare_images(I_original, I_noisy, noisy, I_filtred, I_filtred_CV):
     # plot immagine originale
     fig.add_subplot(2, 2, 1)
     plt.title("Originale", fontweight="bold")
-    plt.imshow(I_original, cmap=plt.cm.gray)
+    plt.imshow(I, cmap=plt.cm.gray)
     plt.axis("off")
     # plot immagine da comparare
     fig.add_subplot(2, 2, 2)
@@ -43,8 +43,11 @@ def compare_images(I_original, I_noisy, noisy, I_filtred, I_filtred_CV):
     plt.imshow(I_filtred, cmap=plt.cm.gray)
     ax = plt.gca()
     ax.axes.xaxis.set_ticks([])
-    ax.axes.yaxis.set_ticks([])    
-    plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (mse(I_original, I_filtred), cv2.PSNR(I_original, I_filtred), ssim(I_original, I_filtred, multichannel=True)), loc="left")
+    ax.axes.yaxis.set_ticks([])
+    if I_noisy.ndim == 2:
+        plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (mse(I_original, I_filtred), cv2.PSNR(I_original, I_filtred), ssim(I_original, I_filtred)), loc="left")
+    else:
+        plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (mse(I_original, I_filtred), cv2.PSNR(I_original, I_filtred), ssim(I_original, I_filtred, multichannel=True)), loc="left")
     # plot immagine da comparare
     fig.add_subplot(2, 2, 4)
     plt.title("Filtro OpenCV", fontweight="bold")
@@ -52,10 +55,13 @@ def compare_images(I_original, I_noisy, noisy, I_filtred, I_filtred_CV):
     ax = plt.gca()
     ax.axes.xaxis.set_ticks([])
     ax.axes.yaxis.set_ticks([])
-    plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (mse(I_original, I_filtred_CV), cv2.PSNR(I_original, I_filtred_CV), ssim(I_original, I_filtred_CV, multichannel=True)), loc="left")
+    if I_noisy.ndim == 2:
+        plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (mse(I_original, I_filtred_CV), cv2.PSNR(I_original, I_filtred_CV), ssim(I_original, I_filtred_CV)), loc="left")
+    else:
+        plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (mse(I_original, I_filtred_CV), cv2.PSNR(I_original, I_filtred_CV), ssim(I_original, I_filtred_CV, multichannel=True)), loc="left")
 
 ## applicazione rumore
-def noisy(noise_typ,image):
+def noisy(noise_typ, image):
    if noise_typ == "gauss": # applicazione rumore Gaussiano
        sigma_g = 0.1
        mean_g = 0
@@ -83,14 +89,14 @@ def noisy(noise_typ,image):
        return noisy
 
 ## filtro guidato
-def guided_filter(image, I_guid, epsil):
+def guided_filter(I_guid, I_noisy, epsil):
     N = 3;
     h = np.ones(N)/(pow(N,2));
     # calcolo medie e correlazioni
-    mean_I = cv2.filter2D(image, -1, h, borderType=cv2.BORDER_REPLICATE);
-    mean_p = cv2.filter2D(I_g, -1, h, borderType=cv2.BORDER_REPLICATE);
-    corr_I = cv2.filter2D(I*I, -1, h, borderType=cv2.BORDER_REPLICATE);
-    corr_Ip = cv2.filter2D(I*I_g, -1, h, borderType=cv2.BORDER_REPLICATE);
+    mean_I = cv2.filter2D(I_guid, -1, h, borderType=cv2.BORDER_REPLICATE);
+    mean_p = cv2.filter2D(I_noisy, -1, h, borderType=cv2.BORDER_REPLICATE);
+    corr_I = cv2.filter2D(I_guid*I_guid, -1, h, borderType=cv2.BORDER_REPLICATE);
+    corr_Ip = cv2.filter2D(I_guid*I_noisy, -1, h, borderType=cv2.BORDER_REPLICATE);
     # calcolo varianza e covarianza
     var_I = corr_I-mean_I*mean_I;
     cov_Ip = corr_Ip-mean_I*mean_p;
@@ -101,56 +107,61 @@ def guided_filter(image, I_guid, epsil):
     mean_a = cv2.filter2D(a, -1, h, borderType=cv2.BORDER_REPLICATE);
     mean_b = cv2.filter2D(b, -1, h, borderType=cv2.BORDER_REPLICATE);
     # calcolo funzione lineare
-    return mean_a*I + mean_b;
+    return mean_a*I_guid + mean_b;
 
 ## filtro guidato di OpenCV
-def guided_filter_OpenCV(image, I_guid, nhoodSize, epsil): 
-    return cv2.ximgproc.guidedFilter(np.uint8(I_guid), np.uint8(image), nhoodSize, epsil, -1);     
+def guided_filter_OpenCV(I_guid, I_noisy, nhoodSize, epsil): 
+    if I_noisy.ndim == 2:
+        return cv2.ximgproc.guidedFilter(np.uint8(I_guid), np.uint8(I_noisy), nhoodSize, epsil, -1);
+    else:
+        return cv2.ximgproc.guidedFilter(np.uint8(I_guid), np.uint8(I_noisy), nhoodSize, epsil);
 
 ## applicazione filtri
-def filters(I,I_noisy):
+def filters(I_guid, I_noisy):
     # filtro manuale
-    I_fil_guid = im2double(guided_filter(I, I_noisy, 0.01))
+    I_fil_guid = im2double(guided_filter(I_guid, I_noisy, 0.5))
     # filtro openCV
-    I_uint8 = cv2.normalize(src=I, dst=None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-    I_g_uint8 = cv2.normalize(src=I_noisy, dst=None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-    I_fil_guid_OpenCV = im2double(guided_filter_OpenCV(I_uint8, I_g_uint8, 5, 0.01))
+    I_guid_uint8 = cv2.normalize(src=I_guid, dst=None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+    I_noisy_uint8 = cv2.normalize(src=I_noisy, dst=None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+    I_fil_guid_OpenCV = im2double(guided_filter_OpenCV(I_guid_uint8, I_noisy_uint8, 5, 0.5))
     return I_fil_guid, I_fil_guid_OpenCV
 
 ## main
 if __name__ == "__main__":
     ## caricamento immagine ##
     img = cv2.imread('cameraman.tif', -1)
-    #img = cv2.imread('peppers.png')  
-    #img = cv2.imread('caster-RGB.tif')
+    img = cv2.imread('peppers.png')  
+    img = cv2.imread('caster-RGB.tif')
     
     ## conversione immagine in double ##
     if img.ndim == 2:
         I = im2double(img) 
     else:
-        I = im2double(img[:,:,2::-1]) 
+        I = im2double(img[:,:,2::-1])
+    
+    I_guid = im2double(noisy("gauss", I));
         
     ## filtraggio di un'immagine con rumore Gaussiano ##
     I_g = im2double(noisy("gauss", I)) 
     #show_image(I_g, 'Immagine con rumore Gaussiano')
-    I_fil_guid, I_fil_guid_OpenCV = filters(I, I_g)
+    I_fil_guid, I_fil_guid_OpenCV = filters(I_guid, I_g)
     compare_images(I, I_g, 'Gaussiano', I_fil_guid, I_fil_guid_OpenCV)
     
     ## filtraggio di un'immagine con rumore Sale e Pepe ##
     I_sp = im2double(noisy("s&p", I))
     #show_image(I_sp, 'Immagine con rumore Sale e Pepe')
-    I_fil_guid, I_fil_guid_OpenCV = filters(I, I_sp)
+    I_fil_guid, I_fil_guid_OpenCV = filters(I_guid, I_sp)
     compare_images(I, I_sp, 'Sale e Pepe', I_fil_guid, I_fil_guid_OpenCV)
     
     ## filtraggio di un'immagine con rumore Poisson ##
     I_poi = im2double(noisy("poisson", I))
     #show_image(I_poi, 'Poisson')
-    I_fil_guid, I_fil_guid_OpenCV = filters(I, I_poi)
+    I_fil_guid, I_fil_guid_OpenCV = filters(I_guid, I_poi)
     compare_images(I, I_poi, 'Poisson', I_fil_guid, I_fil_guid_OpenCV)
     
     ## filtraggio di un'immagine con rumore Speckle (solo a colori) ##
     if img.ndim != 2:
         I_spe = im2double(noisy("speckle", I))
         #show_image(I_spe, 'Speckle')
-        I_fil_guid, I_fil_guid_OpenCV = filters(I, I_spe)
+        I_fil_guid, I_fil_guid_OpenCV = filters(I_guid, I_spe)
         compare_images(I, I_spe, 'Speckle', I_fil_guid, I_fil_guid_OpenCV)
