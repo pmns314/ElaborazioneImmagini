@@ -28,36 +28,9 @@ def show_image_from_coefficients(coeffs, title=None):
     return
 
 
-def get_threshold1(coeff):
-    A = np.array([np.concatenate(([*coeff]), axis=None)])
-    n = ((coeff[0][1]).shape[0])
-    X = A[:, n ** 2 + 1:]
-    sigma = np.median(np.abs(X)) / 0.6745
-    thr = sigma * math.sqrt(2 * math.log((n * 2) ** 2))
-    return thr
-
-
-def denoising_coefficients2(coeff):
-    univ_thr = get_threshold1(coeff)
-    mask = np.ones([3, 3])
-
-    for c in range(1, len(coeff)):
-        denoised_coeff = [0, 0, 0]
-        for i in range(0, 3):
-            imm = coeff[c][i]
-            S = ss.convolve2d(imm * imm, mask, 'same')
-            B = 1 - (univ_thr ** 2 / S)
-            B[B < 0] = 0
-            denoised_coeff[i] = imm*B
-        coeff[c] = tuple(denoised_coeff)
-
-    return coeff
-
-
-def _plot_wavelet_transform(coeff, title, ch, pre):
+def _plot_wavelet_transform(coeff, ch, pre):
     if pre is True:
-        if title is None:
-            title = 'Pre Denoising'
+        title = 'Pre Denoising'
         if ch == 1:
             # fig, axs = plt.subplots(2, 3, constrained_layout=True)
             plt.figure()
@@ -73,8 +46,7 @@ def _plot_wavelet_transform(coeff, title, ch, pre):
             plt.figure()
             plt.subplot(121)
     else:
-        if title is None:
-            title = 'Post Denoising'
+        title = 'Post Denoising'
         if ch == 1:
             plt.subplot(234)
             title = title + '- B'
@@ -89,49 +61,6 @@ def _plot_wavelet_transform(coeff, title, ch, pre):
     show_image_from_coefficients(coeff, title)
 
 
-def denoising_coefficients(coeff):
-    # Get Threshold
-    thr = get_threshold1(coeff)
-
-    for i in range(1, len(coeff)):
-        for imm in coeff[i]:
-            imm[abs(imm) < thr] = 0
-    return coeff
-
-
-def _denoise(image, wname, levels, flag_show=None, title=None, ch=-1):
-    # Wavelet Transform
-    coeff = pywt.wavedec2(image, wname, level=levels)
-
-    # Plot Wavelet Transform
-    if flag_show is not None and flag_show[0] is True:
-        _plot_wavelet_transform(coeff, None if title is None else title[0], ch, True)
-
-    # Denoising Wavelet Transform
-    denoised_coeff = denoising_coefficients2(coeff)
-
-    # Plot Wavelet Tranform Denoised
-    if flag_show is not None and flag_show[1] is True:
-        _plot_wavelet_transform(denoised_coeff, None if title is None else title[1], ch, False)
-
-    # Reconstruct Image
-    return pywt.waverec2(denoised_coeff, wname)
-
-
-def denoise(image, wname, levels, channels, flag_show=None, title=None):
-    if channels == 1:
-        im = _denoise(image, wname, levels, flag_show, title, -1)
-    else:
-        im = np.zeros([*image.shape])
-        for c in range(channels):
-            im[:, :, c] = _denoise(image[:, :, c], wname, levels, flag_show, title, c + 1)
-    return im
-
-
-def get_channels_number(image):
-    return 1 if len(image.shape) == 2 else image.shape[2]
-
-
 # Display image
 def display(image, title=''):
     cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
@@ -140,6 +69,73 @@ def display(image, title=''):
     neww = 400
     newh = int(neww * (h / w))
     cv2.resizeWindow(title, neww, newh)
+
+
+def get_universal_threshold(coeff):
+    A = np.array([np.concatenate(([*coeff]), axis=None)])
+    n = ((coeff[0][1]).shape[0])
+    X = A[:, n ** 2 + 1:]
+    sigma = np.median(np.abs(X)) / 0.6745
+    thr = sigma * math.sqrt(2 * math.log((n * 2) ** 2))
+    return thr
+
+
+def denoising_coefficients(coeff, mode='neigh'):
+    # Get Threshold
+    univ_thr = get_universal_threshold(coeff)
+
+    if mode == 'univ':
+        for i in range(1, len(coeff)):
+            for imm in coeff[i]:
+                imm[abs(imm) < univ_thr] = 0
+
+    elif mode == 'neigh':
+        mask = np.ones([3, 3])
+        for c in range(1, len(coeff)):
+            denoised_coeff = [0, 0, 0]
+            for i in range(0, 3):
+                imm = coeff[c][i]
+                S = ss.convolve2d(imm * imm, mask, 'same')
+                B = 1 - (univ_thr ** 2 / S)
+                B[B < 0] = 0
+                denoised_coeff[i] = imm * B
+            coeff[c] = tuple(denoised_coeff)
+    else:
+        exit(2)
+    return coeff
+
+
+def _denoising(image, wname, levels, show, ch):
+    # Wavelet Transform
+    coeff = pywt.wavedec2(image, wname, level=levels)
+
+    # Plot Wavelet Transform
+    if show is True:
+        _plot_wavelet_transform(coeff, ch, True)
+
+    # Denoising Wavelet Transform
+    denoised_coeff = denoising_coefficients(coeff)
+
+    # Plot Wavelet Tranform Denoised
+    if show is True:
+        _plot_wavelet_transform(denoised_coeff, ch, False)
+
+    # Reconstruct Image
+    return pywt.waverec2(denoised_coeff, wname)
+
+
+def denoise_image(image, wname, levels, channels, show=False):
+    if channels == 1:
+        im = _denoising(image, wname, levels, show, -1)
+    else:
+        im = np.zeros([*image.shape])
+        for c in range(channels):
+            im[:, :, c] = _denoising(image[:, :, c], wname, levels, show, c + 1)
+    return im
+
+
+def get_channels_number(image):
+    return 1 if len(image.shape) == 2 else image.shape[2]
 
 
 if __name__ == '__main__':
@@ -156,8 +152,7 @@ if __name__ == '__main__':
 
     print('Level : ', levels, '\n', end='\t\t')
     # Denoise
-    de_image = denoise(I_noise, wname, levels, channels, (True, True),
-                       title=['Pre_denoise ' + str(levels), 'Post_denoise ' + str(levels)])
+    de_image = denoise_image(I_noise, wname, levels, channels, show=True)
     display(de_image, 'Denoised image with level= ' + str(levels))
 
     # Correzione dimensione immagine
