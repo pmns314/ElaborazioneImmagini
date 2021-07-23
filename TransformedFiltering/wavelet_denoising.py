@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 import skimage.metrics
+import skimage.util
 import scipy.signal as ss
 
 
@@ -126,11 +127,16 @@ def _denoising(image, wname, levels, ch, mode, dim_neigh, show):
 
 def denoise_image(image, wname, levels, channels, mode='neigh', dim_neigh=3, show=False):
     if channels == 1:
-        im = _denoising(image, wname, levels, -1,  mode, dim_neigh, show)
+        im = _denoising(image, wname, levels, -1, mode, dim_neigh, show)
     else:
         im = np.zeros([*image.shape])
         for c in range(channels):
-            im[:, :, c] = _denoising(image[:, :, c], wname, levels, c+1, mode, dim_neigh, show)
+            res = _denoising(image[:, :, c], wname, levels, c + 1, mode, dim_neigh, show)
+            if res.shape[0] != image.shape[0]:
+                res = res[:-1, :]
+            if res.shape[1] != image.shape[1]:
+                res = res[:, :-1]
+            im[:, :, c] = res
     return im
 
 
@@ -139,15 +145,15 @@ def get_channels_number(image):
 
 
 if __name__ == '__main__':
-    I = cv2.imread('../images/rgb/peppers.png', -1)
+    I = cv2.imread('../images/rgb/cat.jpg', -1)
+    display(I, 'Original')
     I_noise = skimage.util.random_noise(I, 'gaussian')
     I = np.uint16(I)
-
     display(I_noise, 'Original with Noise')
     channels = get_channels_number(I_noise)
 
     # Definizione dei parametri della trasformata wavelet
-    wname = 'sym5'
+    wname = 'db3'
     levels = pywt.dwtn_max_level(I_noise.shape[:-1], wname)
 
     print('Level : ', levels, '\n', end='\t\t')
