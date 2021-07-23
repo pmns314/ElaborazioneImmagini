@@ -54,7 +54,6 @@ def compare_images(I_original, I_noisy, noisy, I_filtred, I_filtred_CV):
     ax.axes.yaxis.set_ticks([])
     plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (mse(I_original, I_filtred_CV), cv2.PSNR(I_original, I_filtred_CV), ssim(I_original, I_filtred_CV, multichannel=True)), loc="left")
 
-
 ## applicazione rumore
 def noisy(noise_typ,image):
    if noise_typ == "gauss": # applicazione rumore Gaussiano
