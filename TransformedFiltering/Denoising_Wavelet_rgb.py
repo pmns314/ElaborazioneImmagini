@@ -80,7 +80,7 @@ def get_universal_threshold(coeff):
     return thr
 
 
-def denoising_coefficients(coeff, mode='neigh'):
+def denoising_coefficients(coeff, mode, dim_neigh):
     # Get Threshold
     univ_thr = get_universal_threshold(coeff)
 
@@ -90,7 +90,7 @@ def denoising_coefficients(coeff, mode='neigh'):
                 imm[abs(imm) < univ_thr] = 0
 
     elif mode == 'neigh':
-        mask = np.ones([3, 3])
+        mask = np.ones([dim_neigh, dim_neigh])
         for c in range(1, len(coeff)):
             denoised_coeff = [0, 0, 0]
             for i in range(0, 3):
@@ -101,11 +101,11 @@ def denoising_coefficients(coeff, mode='neigh'):
                 denoised_coeff[i] = imm * B
             coeff[c] = tuple(denoised_coeff)
     else:
-        exit(2)
+        raise Exception('Mode not supported')
     return coeff
 
 
-def _denoising(image, wname, levels, show, ch):
+def _denoising(image, wname, levels, ch, mode, dim_neigh, show):
     # Wavelet Transform
     coeff = pywt.wavedec2(image, wname, level=levels)
 
@@ -114,7 +114,7 @@ def _denoising(image, wname, levels, show, ch):
         _plot_wavelet_transform(coeff, ch, True)
 
     # Denoising Wavelet Transform
-    denoised_coeff = denoising_coefficients(coeff)
+    denoised_coeff = denoising_coefficients(coeff, mode, dim_neigh)
 
     # Plot Wavelet Tranform Denoised
     if show is True:
@@ -124,13 +124,13 @@ def _denoising(image, wname, levels, show, ch):
     return pywt.waverec2(denoised_coeff, wname)
 
 
-def denoise_image(image, wname, levels, channels, show=False):
+def denoise_image(image, wname, levels, channels, mode='neigh', dim_neigh=3, show=False):
     if channels == 1:
-        im = _denoising(image, wname, levels, show, -1)
+        im = _denoising(image, wname, levels, -1,  mode, dim_neigh, show)
     else:
         im = np.zeros([*image.shape])
         for c in range(channels):
-            im[:, :, c] = _denoising(image[:, :, c], wname, levels, show, c + 1)
+            im[:, :, c] = _denoising(image[:, :, c], wname, levels, c+1, mode, dim_neigh, show)
     return im
 
 
@@ -152,8 +152,10 @@ if __name__ == '__main__':
 
     print('Level : ', levels, '\n', end='\t\t')
     # Denoise
-    de_image = denoise_image(I_noise, wname, levels, channels, show=True)
-    display(de_image, 'Denoised image with level= ' + str(levels))
+    de_image = denoise_image(I_noise, wname, levels, channels, mode='neigh', show=True)
+    display(de_image, 'Denoised image with neigh ')
+    de_image = denoise_image(I_noise, wname, levels, channels, mode='univ', show=True)
+    display(de_image, 'Denoised image with univ ')
 
     # Correzione dimensione immagine
     if I.shape != de_image.shape:
