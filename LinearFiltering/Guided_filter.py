@@ -29,12 +29,12 @@ def compare_images(I_original, I_noisy, noisy, I_filtred, I_filtred_CV):
     fig = plt.figure()
     # plot immagine originale
     fig.add_subplot(2, 2, 1)
-    plt.title("Immmagine originale", fontweight="bold")
+    plt.title("Originale", fontweight="bold")
     plt.imshow(I_original, cmap=plt.cm.gray)
     plt.axis("off")
     # plot immagine da comparare
     fig.add_subplot(2, 2, 2)
-    plt.title("Immagine rumorosa", fontweight="bold")
+    plt.title("Rumore " + noisy, fontweight="bold")
     plt.imshow(I_noisy, cmap=plt.cm.gray)
     plt.axis("off")
     # plot immagine originale
@@ -122,8 +122,8 @@ def filters(I,I_noisy):
 if __name__ == "__main__":
     ## caricamento immagine ##
     img = cv2.imread('cameraman.tif', -1)
-    img = cv2.imread('peppers.png')  
-    img = cv2.imread('caster-RGB.tif')
+    #img = cv2.imread('peppers.png')  
+    #img = cv2.imread('caster-RGB.tif')
     
     ## conversione immagine in double ##
     if img.ndim == 2:
