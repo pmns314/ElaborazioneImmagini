@@ -2,15 +2,13 @@
 
 import math
 import pywt
-import numpy as np
-import matplotlib.pyplot as plt
-import cv2
-import skimage.metrics
 import skimage.util
 import scipy.signal as ss
+from Utils import *
 
 
 def show_image_from_coefficients(coeffs, title=None):
+    """ Given the coefficients, it shows the wavelet decomposition"""
     sh = coeffs[len(coeffs) - 1][0].shape
 
     C = np.ones([sh[0] * 2, sh[1] * 2])
@@ -30,6 +28,7 @@ def show_image_from_coefficients(coeffs, title=None):
 
 
 def _plot_wavelet_transform(coeff, ch, pre):
+    """ Defines the subplots in which decompose the image and then shows the wavelet transform """
     if pre is True:
         title = 'Pre Denoising'
         if ch == 1:
@@ -62,17 +61,12 @@ def _plot_wavelet_transform(coeff, ch, pre):
     show_image_from_coefficients(coeff, title)
 
 
-# Display image
-def display(image, title=''):
-    cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
-    cv2.imshow(title, image)
-    h, w = image.shape[0:2]
-    neww = 400
-    newh = int(neww * (h / w))
-    cv2.resizeWindow(title, neww, newh)
-
-
 def get_universal_threshold(coeff):
+    """ Computes the Universal Threshold used for the denoising
+
+    :param coeff - the coefficients of the wavelet decomposition
+    :returns thr - the universal threshold
+    """
     A = np.array([np.concatenate(([*coeff]), axis=None)])
     n = ((coeff[0][1]).shape[0])
     X = A[:, n ** 2 + 1:]
@@ -82,6 +76,13 @@ def get_universal_threshold(coeff):
 
 
 def denoising_coefficients(coeff, mode, dim_neigh):
+    """ Performs the denoising of the wavelets coefficients, either with the universal threshold or with the neighbouring
+
+    :param coeff - the coefficients of the wavelet decomposition
+    :param mode - specifies if using the universal threshold or the neighbouring
+    :param dim_neigh - in case of the neighbouring, it defines the dimension of the window of the neighbourhood
+    """
+
     # Get Threshold
     univ_thr = get_universal_threshold(coeff)
 
@@ -107,6 +108,17 @@ def denoising_coefficients(coeff, mode, dim_neigh):
 
 
 def _denoising(image, wname, levels, ch, mode, dim_neigh, show):
+    """ Performs the wavelet decomposition of the image passed, the denoising of the of those coefficients and then
+     the reconstruction of the image
+
+     :param image - the image to be denoised
+     :param wname - the name of the wavelet used to decompose
+     :param levels - the number of levels of the decomposition
+     :param ch - the current channel of the image
+     :param mode - the mode of the thresholding
+     :param dim_neigh - the dimension of the neighbourhood
+     :param show - a boolean flag. if True, it shows the Wavelet decomposition
+     """
     # Wavelet Transform
     coeff = pywt.wavedec2(image, wname, level=levels)
 
@@ -125,7 +137,22 @@ def _denoising(image, wname, levels, ch, mode, dim_neigh, show):
     return pywt.waverec2(denoised_coeff, wname)
 
 
-def denoise_image(image, wname, levels, channels, mode='neigh', dim_neigh=3, show=False):
+def wavelet_denoising(image, wname='db2', levels=None, mode='neigh', dim_neigh=3, show=False):
+    """
+    Performs the denoising of the image passed through the thresholding of the wavelet decomposition
+
+    :param image: the image to be denoised
+    :param wname: the name of the wavelet used to decompose
+    :param levels: the number of levels of the decomposition
+    :param mode: the mode of the thresholding
+    :param dim_neigh: the dimension of the neighbourhood
+    :param show: a boolean flag. if True, it shows the Wavelet decomposition
+    :returns: the denoised image
+    """
+    channels = get_channels_number(image)
+    if levels is None:
+        levels = pywt.dwtn_max_level(image.shape[:-1], wname)
+        levels = 5 if levels >= 5 else levels
     if channels == 1:
         im = _denoising(image, wname, levels, -1, mode, dim_neigh, show)
     else:
@@ -140,35 +167,64 @@ def denoise_image(image, wname, levels, channels, mode='neigh', dim_neigh=3, sho
     return im
 
 
-def get_channels_number(image):
-    return 1 if len(image.shape) == 2 else image.shape[2]
+def plot_images_test(I_original, I_noisy, noisy, I_filtred_univ, I_filtred_neigh):
+    """ Plots the four images passed and computes the mse, psnr and ssim indexes"""
+    if get_channels_number(I_original) != 1:
+        I_original = bgr2rgb(I_original)
+        I_noisy = bgr2rgb(I_noisy)
+        I_filtred_univ = bgr2rgb(I_filtred_univ)
+        I_filtred_neigh = bgr2rgb(I_filtred_neigh)
+    # creazione del plot
+    fig = plt.figure()
+    # plot immagine originale
+    fig.add_subplot(2, 2, 1)
+    plt.title("Originale", fontweight="bold")
+    plt.imshow(I_original, cmap='gray')
+    plt.axis("off")
+    # plot immagine con rumore
+    fig.add_subplot(2, 2, 2)
+    plt.title("Rumore " + noisy.value, fontweight="bold")
+    plt.imshow(I_noisy, cmap='gray')
+    plt.axis("off")
+    # plot immagine filtrata
+    fig.add_subplot(2, 2, 3)
+    plt.title("univ", fontweight="bold")
+    plt.imshow(I_filtred_univ, cmap='gray')
+    ax = plt.gca()
+    ax.axes.xaxis.set_ticks([])
+    ax.axes.yaxis.set_ticks([])
+
+    plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (
+        evaluate(I_original, I_filtred_univ, False if get_channels_number(I) == 1 else True)), loc="left")
+
+    # plot immagine filtrata con OpenCV
+    fig.add_subplot(2, 2, 4)
+    plt.title("Neigh", fontweight="bold")
+    plt.imshow(I_filtred_neigh, cmap='gray')
+    ax = plt.gca()
+    ax.axes.xaxis.set_ticks([])
+    ax.axes.yaxis.set_ticks([])
+    plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (
+        evaluate(I_original, I_filtred_neigh, False if get_channels_number(I) == 1 else True)), loc="left")
 
 
 if __name__ == '__main__':
-    I = cv2.imread('../images/rgb/cat.jpg', -1)
-    display(I, 'Original')
-    I_noise = skimage.util.random_noise(I, 'gaussian')
-    I = np.uint16(I)
-    display(I_noise, 'Original with Noise')
-    channels = get_channels_number(I_noise)
+    I = cv2.imread('../images/rgb/peppers.png', -1)
+    type_noise = Noise.GAUSSIAN
+    I_noise = add_noise(I, type_noise)
 
-    # Definizione dei parametri della trasformata wavelet
-    wname = 'db3'
-    levels = pywt.dwtn_max_level(I_noise.shape[:-1], wname)
-
-    print('Level : ', levels, '\n', end='\t\t')
     # Denoise
-    de_image = denoise_image(I_noise, wname, levels, channels, mode='neigh', show=False)
-    display(de_image, 'Denoised image with neigh ')
-    de_image = denoise_image(I_noise, wname, levels, channels, mode='univ', show=False)
-    display(de_image, 'Denoised image with univ ')
+    de_image_neigh = wavelet_denoising(I_noise, mode='neigh', show=False)
+    de_image_univ = wavelet_denoising(I_noise, mode='univ', show=False)
 
-    # Correzione dimensione immagine
-    if I.shape != de_image.shape:
-        de_image = de_image[:-1, :]
-    de_image = skimage.img_as_uint(de_image / 255)
-    print('PSNR: ' + '%.4f' % skimage.metrics.peak_signal_noise_ratio(I, de_image), end='\t\t')
-    print('SSIM: ' + '%.4f' % skimage.metrics.structural_similarity(I, de_image, multichannel=(channels != 1)))
+    plot_images_test(I, I_noise, type_noise, de_image_univ, de_image_neigh)
 
+    print("Univ:\tMSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % evaluate(I, de_image_univ,
+                                                                          False if get_channels_number(
+                                                                              I) == 1 else True))
+
+    print("Neigh:\tMSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % evaluate(I, de_image_neigh,
+                                                                           False if get_channels_number(
+                                                                               I) == 1 else True))
     plt.show()
     cv2.waitKey(0)

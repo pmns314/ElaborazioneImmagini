@@ -1,11 +1,9 @@
 import numpy as np
 import cv2
 import skimage as sk
-from scipy import ndimage
 from scipy import stats
 from skimage.restoration import estimate_sigma
-
-from Morphological import morphological_open, morphological_close
+from NonLinearFiltering.Morphological import morphological_open, morphological_close
 
 
 def anisodiff(img, kappa=0.2, option=1, neightborhood='minimal'):

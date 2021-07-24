@@ -1,37 +1,18 @@
 "Dario Cival mat: "
-from imageio.plugins._tifffile import FileHandle
 
-from Measures import *
-from Noise import *
-from matplotlib import pyplot as plt
 from anysotropic import *
-
-
-def show_image(image, title, gray=False):
-    """
-    visualizza l'immagine
-    :param image: immagine
-    :param title: titolo dell'immagine
-    :param gray: Se gray = true indica che l'immagine che si vuole visualizzare è in scala di grigio, altrimenti deve essere impostato a False
-    :return:
-    """
-    plt.figure()
-    plt.title(title)
-    if gray:
-        plt.imshow(image, cmap='gray')
-    else:
-        plt.imshow(image)
+from Utils import *
 
 
 def conduction_function(image, image_noise, range_it, g1, g2, kappa, option1, option2):
     for i in range_it:
         an = aniso(image_noise, i, kappa, option=1, neightborhood=option1)
-        meas = print_PSNR(image, an, '')
-        g1.append(meas)
+        meas = evaluate(image, an, False if get_channels_number(image) == 1 else True)
+        g1.append(meas[1])
 
         an2 = aniso(image_noise, i, kappa, option=2, neightborhood=option2)
-        meas2 = print_PSNR(image, an2, '')
-        g2.append(meas2)
+        meas2 = evaluate(image, an2, False if get_channels_number(image) == 1 else True)
+        g2.append(meas2[1])
 
 
 def valutation_automatic_parameters(image, sigmas, noise='gaussian', option=1, neightborhood='minimal'):
@@ -48,7 +29,7 @@ def valutation_automatic_parameters(image, sigmas, noise='gaussian', option=1, n
     I = image.copy()
     if noise == 'gaussian':
         for sigma in sigmas:
-            im = add_gaussian(I, 0, sigma)
+            im = add_noise(I, 'gauss', sigma_g=sigma, mean_g=0)
             kappa, mum_it = automatic_parameters(im, option, neightborhood)
             print("sigma: " + str(sigma), "thresh: " + str(kappa), "it: " + str(mum_it),
                   "estimation noise: " + str(estimate_noise(im)))
@@ -71,14 +52,14 @@ def valutation_threshold(image, num_iteration, option=1, neightborhood='minimal'
     an3 = aniso(image, num_iteration, k3, option, neightborhood)
 
     # VALUTAZIONE THRESHOLD CON APPROCCIO DI PERONA-MALIK
-    print_SSIM(image, an1, 'SSIM PERONA-MALIK', prin=True)
-    print_PSNR(image, an1, 'PSNR PERONA-MALIK', prin=True)
+    print("PERONA-MALIK:    MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f " % evaluate(image, an1, False if get_channels_number(
+        image) == 1 else True))
     # VALUTAZIONE THRESHOLD CON MAD
-    print_SSIM(image, an2, 'SSIM MAD', prin=True)
-    print_PSNR(image, an2, 'PSNR MAD', prin=True)
+    print("MAD:             MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f " % evaluate(image, an2, False if get_channels_number(
+        image) == 1 else True))
     # VALUTAZIONE THRESHOLD MORPHO
-    print_SSIM(image, an3, 'SSIM MORPHO', prin=True)
-    print_PSNR(image, an3, 'PSNR MORPHO', prin=True)
+    print("MORPHO:          MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f " % evaluate(image, an3, False if get_channels_number(
+        image) == 1 else True))
 
 
 # GRAY SCALE IMAGE
@@ -107,10 +88,9 @@ sigmas = [0.01, 0.05, 0.08, 0.1, 0.2, 0.5, 0.7, 1]
 # # valutation_automatic_parameters(cameraman_noise, sigmas, noise='gaussian', option=1, neightborhood='minimal')
 
 # COLOR IMAGE
-I = sk.img_as_float(cv2.imread('images/peppers.png'))
+I = sk.img_as_float(cv2.imread('../images/rgb/peppers.png'))
 I = I[:, :, 2::-1]
-I_noise = add_gaussian(I, 0, sigmas[3])
-
+I_noise = add_noise(I, 'gauss', sigma_g=sigmas[3], mean_g=0)
 show_image(I_noise, 'original')
 k_R, k_G, k_B, it_R, it_G, it_B = automatic_parameters_RGB(I_noise, 1, 'minimal')
 
@@ -118,8 +98,8 @@ print(it_R, it_G, it_B)
 
 sp = anisoRGB(I_noise, it_R, it_G, it_B, k_R[0], k_G[0], k_B[0])
 sp2 = anisoRGB(I_noise, it_R, it_G, it_B, k_R[0], k_G[0], k_B[0])
-print_PSNR(I, sp, 'PSNR aniso RGB', multichannel=True, prin=True)
-print_SSIM(I, sp, 'SSIM aniso RGB', multichannel=True, prin=True)
+print("Aniso RGB:    MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f " % evaluate(I, sp,
+                                                                        False if get_channels_number(I) == 1 else True))
 show_image(sp, 'sp')
 
 plt.show()
