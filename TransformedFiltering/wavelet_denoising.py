@@ -158,9 +158,9 @@ if __name__ == '__main__':
 
     print('Level : ', levels, '\n', end='\t\t')
     # Denoise
-    de_image = denoise_image(I_noise, wname, levels, channels, mode='neigh', show=True)
+    de_image = denoise_image(I_noise, wname, levels, channels, mode='neigh', show=False)
     display(de_image, 'Denoised image with neigh ')
-    de_image = denoise_image(I_noise, wname, levels, channels, mode='univ', show=True)
+    de_image = denoise_image(I_noise, wname, levels, channels, mode='univ', show=False)
     display(de_image, 'Denoised image with univ ')
 
     # Correzione dimensione immagine

@@ -32,17 +32,17 @@ def show_images(images, titles, channels=1):
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
     # assign directory
-    directory = '../images/rgb'
+    directory = '../images/b&w'
 
     # iterate over files in the directory
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
 
         # Read Image
-        I = cv2.imread(f)
+        I = cv2.imread(f, -1)
 
         # Add Noise
-        I_noise = skimage.util.random_noise(I, 'gaussian')
+        I_noise = skimage.util.random_noise(I, 's&p')
         channels = get_channels_number(I_noise)
 
         # Definizione Parametri
@@ -64,4 +64,4 @@ if __name__ == '__main__':
         print("\t\t\t\t\t\t MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f" % vals_neigh)
         print("\t\t\t\t\t\t MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f" % vals_univ)
         show_images([I, I_noise, de_image, de_image_neigh], ["Original", "Noise", "Univ", "Neigh"], channels)
-        plt.show()
+    plt.show()
