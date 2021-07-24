@@ -1,3 +1,5 @@
+from enum import Enum
+
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
@@ -43,18 +45,19 @@ def evaluate(imageA, imageB, rgb_flag):
 def add_noise(image, noise_type, sigma_g=0.1, mean_g=0, p_sp=0.05):
     """ Add the specified noise to the image """
     noisy = None
-    if noise_type == "gauss":  # Gaussian Noise
+
+    if noise_type.value == "gaussian":  # Gaussian Noise
         ifl = sk.util.img_as_float(image.copy())
         noise_g = mean_g + sigma_g * np.random.randn(*image.shape)
         noisy = np.clip(ifl + noise_g, 0.0, 1.0)
-    elif noise_type == "s&p":  # Salt and Pepper noise
+    elif noise_type.value == "s&p":  # Salt and Pepper noise
         noisy = sk.util.img_as_float(image.copy())
         noisy[np.random.rand(*noisy.shape) < p_sp / 2] = 0
         aux = np.random.rand(*noisy.shape)
         noisy[(aux > p_sp / 2) & (aux < p_sp)] = 1
-    elif noise_type == "poisson":  # Poisson noise
+    elif noise_type.value == "poisson":  # Poisson noise
         noisy = sk.util.random_noise(image, 'poisson')
-    elif noise_type == "speckle":  # Speckle noise
+    elif noise_type.value == "speckle":  # Speckle noise
         noisy = sk.util.random_noise(image, 'speckle')
     return noisy
 
@@ -67,3 +70,10 @@ def get_channels_number(image):
 def bgr2rgb(image):
     image = im2double(image)
     return image[:, :, 2::-1]
+
+
+class Noise(Enum):
+    GAUSSIAN = "gaussian"
+    SALT_AND_PEPPER = "s&p"
+    POISSON = "poisson"
+    SPECKLE = "speckle"

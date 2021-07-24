@@ -1,22 +1,35 @@
+
 from Utils import *
-from LinearFiltering.Guided_filter import guided_filter
-from TransformedFiltering.wavelet_denoising import denoise_image
+from LinearFiltering.Guided_filter import guided_filter, guided_filter_OpenCV
+from TransformedFiltering.wavelet_denoising import wavelet_denoising
 from NonLinearFiltering.anysotropic import aniso, anisoRGB
 
 
 def images_comparation(I, I_noise, linear, non_linear, transformed, type_noise):
     """ Plots the images passed and computes the mse, psnr and ssim indexes"""
+    if get_channels_number(I) != 1:
+        I = bgr2rgb(I)
+        I_noise = bgr2rgb(I_noise)
+        linear = bgr2rgb(linear)
+        non_linear = bgr2rgb(non_linear)
+        transformed = bgr2rgb(transformed)
+
     fig = plt.figure()
-    fig.add_subplot(1, 2, 1)
+    fig.add_subplot(2, 2, 1)
     plt.title("Original", fontweight="bold")
     plt.imshow(I, cmap='gray')
+    ax = plt.gca()
+    ax.axes.xaxis.set_ticks([])
+    ax.axes.yaxis.set_ticks([])
 
-    fig.add_subplot(1, 2, 2)
-    plt.title("Added Noise: " + type_noise, fontweight="bold")
+    fig.add_subplot(2, 2, 2)
+    plt.title("Added Noise: " + type_noise.value, fontweight="bold")
     plt.imshow(I_noise, cmap='gray')
+    ax = plt.gca()
+    ax.axes.xaxis.set_ticks([])
+    ax.axes.yaxis.set_ticks([])
 
-    fig = plt.figure()
-    fig.add_subplot(1, 3, 1)
+    fig.add_subplot(2, 3, 4)
     plt.title("Linear", fontweight="bold")
     plt.imshow(linear, cmap='gray')
     plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (
@@ -25,7 +38,7 @@ def images_comparation(I, I_noise, linear, non_linear, transformed, type_noise):
     ax.axes.xaxis.set_ticks([])
     ax.axes.yaxis.set_ticks([])
 
-    fig.add_subplot(1, 3, 2)
+    fig.add_subplot(2, 3, 5)
     plt.title("Non Linear ", fontweight="bold")
     plt.imshow(non_linear, cmap='gray')
     plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (
@@ -34,7 +47,7 @@ def images_comparation(I, I_noise, linear, non_linear, transformed, type_noise):
     ax.axes.xaxis.set_ticks([])
     ax.axes.yaxis.set_ticks([])
 
-    fig.add_subplot(1, 3, 3)
+    fig.add_subplot(2, 3, 6)
     plt.title("Transformed", fontweight="bold")
     plt.imshow(transformed, cmap='gray')
     ax = plt.gca()
@@ -46,16 +59,15 @@ def images_comparation(I, I_noise, linear, non_linear, transformed, type_noise):
 
 if __name__ == '__main__':
     # Reading image
-    I = cv2.imread('./images/rgb/cat.jpg', -1)
-    type_noise = 'gauss'
-    I_noise = add_noise(I, type_noise)
-    I = np.uint16(I)
+    I = cv2.imread('./images/b&w/building.tif', -1)
 
-    # Denoising
-    linear = guided_filter(I_noise, I_noise)
-    transformed = denoise_image(I_noise)
-    non_linear = anisoRGB(I_noise, 5, 5, 5, 0.3, 0.3, 0.3)
+    for type_noise in Noise:
+        I_noise = add_noise(I, type_noise)
+        # Denoising
+        linear = guided_filter_OpenCV(I_noise, I_noise)
+        transformed = wavelet_denoising(I_noise)
+        non_linear = aniso(I_noise, 5, 0.3)
 
-    images_comparation(bgr2rgb(I), bgr2rgb(I_noise), bgr2rgb(linear), bgr2rgb(non_linear),
-                       bgr2rgb(transformed), type_noise)
+        images_comparation(I, I_noise, linear, non_linear, transformed, type_noise)
+
     plt.show()

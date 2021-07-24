@@ -19,7 +19,7 @@ if __name__ == '__main__':
         levels_tot = pywt.dwtn_max_level(I_noise.shape[:-1], wname)
         for levels in range(1, levels_tot+1):
             # Denoising
-            de_image_neigh = denoise_image(I_noise, wname, levels, channels, mode='neigh')
+            de_image_neigh = wavelet_denoising(I_noise, wname, levels, channels, mode='neigh')
 
             # Agreement dimensions of the images
             if de_image_neigh.shape != I.shape:
