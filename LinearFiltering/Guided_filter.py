@@ -46,7 +46,7 @@ def compare_images(I_original, I_noisy, noisy, I_filtred, I_filtred_CV):
 
 
 ## filtro guidato
-def guided_filter(I_guid, I_noisy, epsil):
+def guided_filter(I_guid, I_noisy, epsil=0.5):
     N = 3
     h = np.ones(N) / (pow(N, 2))
     # calcolo medie e correlazioni

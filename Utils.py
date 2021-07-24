@@ -32,6 +32,8 @@ def display(image, title=''):
 
 
 def evaluate(imageA, imageB, rgb_flag):
+    imageA = im2double(imageA)
+    imageB = im2double(imageB)
     m = mse(imageA, imageB)
     p = cv2.PSNR(imageA, imageB)
     s = ssim(imageA, imageB, multichannel=rgb_flag)
@@ -51,9 +53,7 @@ def add_noise(image, noise_type, sigma_g=0.1, mean_g=0, p_sp=0.05):
         aux = np.random.rand(*noisy.shape)
         noisy[(aux > p_sp / 2) & (aux < p_sp)] = 1
     elif noise_type == "poisson":  # Poisson noise
-        vals = len(np.unique(image))
-        vals = 2 ** np.ceil(np.log2(vals))
-        noisy = np.random.poisson(image * vals) / float(vals)
+        noisy = sk.util.random_noise(image, 'poisson')
     elif noise_type == "speckle":  # Speckle noise
         noisy = sk.util.random_noise(image, 'speckle')
     return noisy

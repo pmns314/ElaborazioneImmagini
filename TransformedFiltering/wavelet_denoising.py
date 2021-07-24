@@ -113,7 +113,11 @@ def _denoising(image, wname, levels, ch, mode, dim_neigh, show):
     return pywt.waverec2(denoised_coeff, wname)
 
 
-def denoise_image(image, wname, levels, channels, mode='neigh', dim_neigh=3, show=False):
+def denoise_image(image, wname='db3', levels=None, mode='neigh', dim_neigh=3, show=False):
+    channels = get_channels_number(image)
+    if levels is None:
+        levels = pywt.dwtn_max_level(image.shape[:-1], wname)
+
     if channels == 1:
         im = _denoising(image, wname, levels, -1, mode, dim_neigh, show)
     else:
