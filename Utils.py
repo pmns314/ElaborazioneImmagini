@@ -62,3 +62,8 @@ def add_noise(image, noise_type, sigma_g=0.1, mean_g=0, p_sp=0.05):
 def get_channels_number(image):
     """ Return the number of channels of the image """
     return 1 if len(image.shape) == 2 else image.shape[2]
+
+
+def bgr2rgb(image):
+    image = im2double(image)
+    return image[:, :, 2::-1]

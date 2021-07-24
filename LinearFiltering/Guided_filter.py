@@ -46,8 +46,7 @@ def compare_images(I_original, I_noisy, noisy, I_filtred, I_filtred_CV):
 
 
 ## filtro guidato
-def guided_filter(I_guid, I_noisy, epsil=0.5):
-    N = 3
+def guided_filter(I_guid, I_noisy, epsil=0.5, N=5):
     h = np.ones(N) / (pow(N, 2))
     # calcolo medie e correlazioni
     mean_I = cv2.filter2D(I_guid, -1, h, borderType=cv2.BORDER_REPLICATE)
