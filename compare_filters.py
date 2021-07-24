@@ -59,14 +59,15 @@ def images_comparation(I, I_noise, linear, non_linear, transformed, type_noise):
 
 if __name__ == '__main__':
     # Reading image
-    I = cv2.imread('./images/b&w/building.tif', -1)
+    I = cv2.imread('./images/rgb/peppers.png', -1)
 
     for type_noise in Noise:
-        I_noise = add_noise(I, type_noise)
+        I_noise = add_noise(I, type_noise, sigma_g=0.2)
         # Denoising
         linear = guided_filter_OpenCV(I_noise, I_noise)
         transformed = wavelet_denoising(I_noise)
-        non_linear = aniso(I_noise, 5, 0.3)
+        #non_linear = aniso(I_noise, 5, 0.3)
+        non_linear = anisoRGB(I_noise, 5, 5, 5, 0.3, 0.3, 0.3)
 
         images_comparation(I, I_noise, linear, non_linear, transformed, type_noise)
 

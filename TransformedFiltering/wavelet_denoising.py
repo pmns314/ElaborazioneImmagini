@@ -2,7 +2,6 @@
 
 import math
 import pywt
-import skimage.metrics
 import skimage.util
 import scipy.signal as ss
 from Utils import *
@@ -138,7 +137,7 @@ def _denoising(image, wname, levels, ch, mode, dim_neigh, show):
     return pywt.waverec2(denoised_coeff, wname)
 
 
-def wavelet_denoising(image, wname='db32', levels=None, mode='neigh', dim_neigh=3, show=False):
+def wavelet_denoising(image, wname='db2', levels=None, mode='neigh', dim_neigh=3, show=False):
     """
     Performs the denoising of the image passed through the thresholding of the wavelet decomposition
 
@@ -153,7 +152,7 @@ def wavelet_denoising(image, wname='db32', levels=None, mode='neigh', dim_neigh=
     channels = get_channels_number(image)
     if levels is None:
         levels = pywt.dwtn_max_level(image.shape[:-1], wname)
-
+        levels = 5 if levels >= 5 else levels
     if channels == 1:
         im = _denoising(image, wname, levels, -1, mode, dim_neigh, show)
     else:
@@ -168,29 +167,64 @@ def wavelet_denoising(image, wname='db32', levels=None, mode='neigh', dim_neigh=
     return im
 
 
+def plot_images_test(I_original, I_noisy, noisy, I_filtred_univ, I_filtred_neigh):
+    """ Plots the four images passed and computes the mse, psnr and ssim indexes"""
+    if get_channels_number(I_original) != 1:
+        I_original = bgr2rgb(I_original)
+        I_noisy = bgr2rgb(I_noisy)
+        I_filtred_univ = bgr2rgb(I_filtred_univ)
+        I_filtred_neigh = bgr2rgb(I_filtred_neigh)
+    # creazione del plot
+    fig = plt.figure()
+    # plot immagine originale
+    fig.add_subplot(2, 2, 1)
+    plt.title("Originale", fontweight="bold")
+    plt.imshow(I_original, cmap='gray')
+    plt.axis("off")
+    # plot immagine con rumore
+    fig.add_subplot(2, 2, 2)
+    plt.title("Rumore " + noisy.value, fontweight="bold")
+    plt.imshow(I_noisy, cmap='gray')
+    plt.axis("off")
+    # plot immagine filtrata
+    fig.add_subplot(2, 2, 3)
+    plt.title("univ", fontweight="bold")
+    plt.imshow(I_filtred_univ, cmap='gray')
+    ax = plt.gca()
+    ax.axes.xaxis.set_ticks([])
+    ax.axes.yaxis.set_ticks([])
+
+    plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (
+        evaluate(I_original, I_filtred_univ, False if get_channels_number(I) == 1 else True)), loc="left")
+
+    # plot immagine filtrata con OpenCV
+    fig.add_subplot(2, 2, 4)
+    plt.title("Neigh", fontweight="bold")
+    plt.imshow(I_filtred_neigh, cmap='gray')
+    ax = plt.gca()
+    ax.axes.xaxis.set_ticks([])
+    ax.axes.yaxis.set_ticks([])
+    plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (
+        evaluate(I_original, I_filtred_neigh, False if get_channels_number(I) == 1 else True)), loc="left")
+
+
 if __name__ == '__main__':
-    I = cv2.imread('../images/b&w/cameraman.tif', -1)
-    display(I, 'Original')
-    I_noise = skimage.util.random_noise(I, 'speckle')
-    I = np.uint16(I)
-    display(I_noise, 'Original with Noise')
+    I = cv2.imread('../images/rgb/peppers.png', -1)
+    type_noise = Noise.GAUSSIAN
+    I_noise = add_noise(I, type_noise)
 
-    # Definizione dei parametri della trasformata wavelet
-    wname = 'db3'
-    levels = pywt.dwtn_max_level(I_noise.shape[:-1], wname)
-
-    print('Level : ', levels, '\n', end='\t\t')
     # Denoise
-    de_image = wavelet_denoising(I_noise, wname, levels, mode='neigh', show=False)
-    display(de_image, 'Denoised image with neigh ')
-    de_image = wavelet_denoising(I_noise, wname, levels, mode='univ', show=False)
-    display(de_image, 'Denoised image with univ ')
+    de_image_neigh = wavelet_denoising(I_noise, mode='neigh', show=False)
+    de_image_univ = wavelet_denoising(I_noise, mode='univ', show=False)
 
-    # Correzione dimensione immagine
-    if I.shape != de_image.shape:
-        de_image = de_image[:-1, :]
-    de_image = skimage.img_as_uint(de_image / 255)
-    evaluations = evaluate(I, de_image, False if get_channels_number(I) == 1 else True)
-    print("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" %evaluations)
+    plot_images_test(I, I_noise, type_noise, de_image_univ, de_image_neigh)
+
+    print("Univ:\tMSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % evaluate(I, de_image_univ,
+                                                                          False if get_channels_number(
+                                                                              I) == 1 else True))
+
+    print("Neigh:\tMSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % evaluate(I, de_image_neigh,
+                                                                           False if get_channels_number(
+                                                                               I) == 1 else True))
     plt.show()
     cv2.waitKey(0)
