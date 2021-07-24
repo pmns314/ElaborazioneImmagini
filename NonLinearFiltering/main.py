@@ -81,42 +81,45 @@ def valutation_threshold(image, num_iteration, option=1, neightborhood='minimal'
     print_PSNR(image, an3, 'PSNR MORPHO', prin=True)
 
 
-if __name__ == '__main__':
+# GRAY SCALE IMAGE
+#
+# cameraman = sk.img_as_float(cv2.imread('images/cameraman.jpg', 0))
+# sigmas = np.arange(0, 0.5, 0.025)
+#
+sigmas = [0.01, 0.05, 0.08, 0.1, 0.2, 0.5, 0.7, 1]
+# cameraman_noise = add_gaussian(cameraman, 0, sigmas[2])
+# kappa = get_gradient_thresh_morpho(cameraman_noise)
+#
+# kappas, num_iteration = automatic_parameters(cameraman_noise, 1, 'minimal')
+# print(kappas, num_iteration)
+# kappa = kappas[0]
+# an2 = aniso(cameraman_noise, num_iteration, kappas, 1, 'minimal', single_threshold=False)
+#
+# print_PSNR(cameraman, an2, 'PSNR an2', prin=True)
+# print_SSIM(cameraman, an2, 'SSIM an2', prin=True)
+# show_image(an2, 'aniso PERONA-MALIK', True)
+# show_image(cameraman_noise, 'noise', True)
+# # valutation_threshold(cameraman_noise, 5, option=1, neightborhood='minimal')
+# an = aniso(cameraman_noise, 5, get_gradient_thresh_MAD(cameraman_noise))
+# print_PSNR(cameraman, an, 'PSNR MAD', prin=True)
+# print_SSIM(cameraman, an, 'SSIM MAD', prin=True)
+# show_image(an, 'aniso MAD', True)
+# # valutation_automatic_parameters(cameraman_noise, sigmas, noise='gaussian', option=1, neightborhood='minimal')
 
-    # GRAY SCALE IMAGE
+# COLOR IMAGE
+I = sk.img_as_float(cv2.imread('images/peppers.png'))
+I = I[:, :, 2::-1]
+I_noise = add_gaussian(I, 0, sigmas[3])
 
-    cameraman = sk.img_as_float(cv2.imread('../images/b&w/cameraman.tif', 0))
-    sigmas = np.arange(0, 0.5, 0.025)
+show_image(I_noise, 'original')
+k_R, k_G, k_B, it_R, it_G, it_B = automatic_parameters_RGB(I_noise, 1, 'minimal')
 
-    sigmas = [0.01, 0.05, 0.08, 0.1, 0.2, 0.5, 0.7, 1]
-    # cameraman_noise = add_salt_pepper(cameraman, 0.05)
-    # kappa = get_gradient_thresh_morpho(cameraman_noise)
-    #
-    # kappas, num_iteration = automatic_parameters(cameraman_noise, 1, 'minimal')
-    # print(kappas, num_iteration)
-    # kappa = kappas[0]
-    # an2 = aniso(cameraman_noise, num_iteration, kappa, 1, 'minimal')
-    # print_PSNR(cameraman, an2, 'PSNR an2', prin=True)
-    # print_SSIM(cameraman, an2, 'SSIM an2', prin=True)
-    # show_image(an2, 'aniso PERONA-MALIK', True)
-    # show_image(cameraman_noise, 'noise', True)
-    # valutation_threshold(cameraman_noise, 5, option=1, neightborhood='minimal')
-    # an = aniso(cameraman_noise, 10, get_gradient_thresh_MAD(cameraman_noise))
-    # show_image(an, 'aniso MAD', True)
-    # valutation_automatic_parameters(cameraman_noise, sigmas, noise='gaussian', option=1, neightborhood='minimal')
+print(it_R, it_G, it_B)
 
-    # COLOR IMAGE
-    I = sk.img_as_float(cv2.imread('../images/rgb/peppers.png'))
-    I = I[:, :, 2::-1]
-    I_noise = add_gaussian(I, 0, sigmas[3])
+sp = anisoRGB(I_noise, it_R, it_G, it_B, k_R[0], k_G[0], k_B[0])
+sp2 = anisoRGB(I_noise, it_R, it_G, it_B, k_R[0], k_G[0], k_B[0])
+print_PSNR(I, sp, 'PSNR aniso RGB', multichannel=True, prin=True)
+print_SSIM(I, sp, 'SSIM aniso RGB', multichannel=True, prin=True)
+show_image(sp, 'sp')
 
-    show_image(I_noise, 'original')
-    k_R, k_G, k_B, it_R, it_G, it_B = automatic_parameters_RGB(I_noise, 1, 'minimal')
-
-    print(it_R, it_G, it_B)
-    sp = anisoRGB(I_noise, it_R, it_G, it_B, k_R[0], k_G[0], k_B[0])
-    print_PSNR(I, sp, 'PSNR aniso RGB', multichannel=True, prin=True)
-    print_SSIM(I, sp, 'SSIM aniso RGB', multichannel=True, prin=True)
-    show_image(sp, 'sp')
-    #
-    plt.show()
+plt.show()

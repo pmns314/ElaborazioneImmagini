@@ -110,10 +110,10 @@ def anisodiff(img, kappa=0.2, option=1, neightborhood='minimal'):
         deltaE[:, :-1] = np.diff(imgout, axis=1)
         deltaN[1:, :] = -deltaS[:-1, :]
         deltaW[:, 1:] = -deltaE[:, :-1]
-        deltaNE = cv2.filter2D(imgout, win_NE)
-        deltaNW = cv2.filter2D(imgout, win_NW)
-        deltaSE = cv2.filter2D(imgout, win_SE)
-        deltaSW = cv2.filter2D(imgout, win_SW)
+        deltaNE = cv2.filter2D(imgout, -1, win_NE)
+        deltaNW = cv2.filter2D(imgout, -1, win_NW)
+        deltaSE = cv2.filter2D(imgout, -1, win_SE)
+        deltaSW = cv2.filter2D(imgout, -1, win_SW)
 
         if option == 1:
 
@@ -151,18 +151,22 @@ def anisodiff(img, kappa=0.2, option=1, neightborhood='minimal'):
     return imgout
 
 
-def aniso(image, number_iteration, kappa, option=1, neightborhood='minimal'):
+def aniso(image, number_iteration, kappas, option=1, neightborhood='minimal', single_threshold=True):
     I = image.copy()
     # più è alto il numero di iterazioni più l'immagine risulta sfocata
-    for i in range(number_iteration):
-        I = anisodiff(I, kappa, option, neightborhood)
+    if not single_threshold:
+        for i in range(number_iteration):
+            I = anisodiff(I, kappas[i], option, neightborhood)
+    else:
+        for i in range(number_iteration):
+            I = anisodiff(I, kappas, option, neightborhood)
     return I
 
 
-def anisoRGB(image, it_R, it_G, it_B, k_R, k_G, k_B, option=1, neightborhood='minimal'):
-    R = aniso(image[:, :, 0], it_R, k_R, option, neightborhood)
-    G = aniso(image[:, :, 1], it_G, k_G, option, neightborhood)
-    B = aniso(image[:, :, 2], it_B, k_B, option, neightborhood)
+def anisoRGB(image, it_R, it_G, it_B, k_R, k_G, k_B, option=1, neightborhood='minimal', single_threshold=True):
+    R = aniso(image[:, :, 0], it_R, k_R, option, neightborhood, single_threshold)
+    G = aniso(image[:, :, 1], it_G, k_G, option, neightborhood, single_threshold)
+    B = aniso(image[:, :, 2], it_B, k_B, option, neightborhood, single_threshold)
     return np.dstack((R, G, B))
 
 
