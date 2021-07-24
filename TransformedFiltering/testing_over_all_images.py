@@ -1,25 +1,16 @@
 from wavelet_denoising import *
 import os
 import warnings
-from skimage.metrics import structural_similarity as ssim
-from skimage.metrics import mean_squared_error
 from LinearFiltering.Guided_filter import im2double
 
 
-def evaluate(imageA, imageB):
-    m = mean_squared_error(imageA, imageB)
-    p = cv2.PSNR(imageA, imageB)
-    s = ssim(imageA, imageB, multichannel=True)
-    return m, p, s
-
-
 def show_images(images, titles, channels=1):
-    # creazioen del plot
+    # creazione del plot
     fig = plt.figure()
     n = len(images)
     # plot immagine originale
     for i in range(1, n + 1):
-        fig.add_subplot(n//2, n//2, i)
+        fig.add_subplot(n // 2, n // 2, i)
         plt.title(titles[i - 1])
         image = cv2.normalize(images[i - 1], None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
         if channels == 1:

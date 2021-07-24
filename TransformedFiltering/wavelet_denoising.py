@@ -2,12 +2,10 @@
 
 import math
 import pywt
-import numpy as np
-import matplotlib.pyplot as plt
-import cv2
 import skimage.metrics
 import skimage.util
 import scipy.signal as ss
+from Utils import *
 
 
 def show_image_from_coefficients(coeffs, title=None):
@@ -60,16 +58,6 @@ def _plot_wavelet_transform(coeff, ch, pre):
         else:
             plt.subplot(122)
     show_image_from_coefficients(coeff, title)
-
-
-# Display image
-def display(image, title=''):
-    cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
-    cv2.imshow(title, image)
-    h, w = image.shape[0:2]
-    neww = 400
-    newh = int(neww * (h / w))
-    cv2.resizeWindow(title, neww, newh)
 
 
 def get_universal_threshold(coeff):
@@ -140,14 +128,10 @@ def denoise_image(image, wname, levels, channels, mode='neigh', dim_neigh=3, sho
     return im
 
 
-def get_channels_number(image):
-    return 1 if len(image.shape) == 2 else image.shape[2]
-
-
 if __name__ == '__main__':
-    I = cv2.imread('../images/rgb/cat.jpg', -1)
+    I = cv2.imread('../images/b&w/cameraman.tif', -1)
     display(I, 'Original')
-    I_noise = skimage.util.random_noise(I, 'gaussian')
+    I_noise = skimage.util.random_noise(I, 'speckle')
     I = np.uint16(I)
     display(I_noise, 'Original with Noise')
     channels = get_channels_number(I_noise)
