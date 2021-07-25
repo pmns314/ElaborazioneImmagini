@@ -58,13 +58,13 @@ def images_comparation(I, I_noise, linear, non_linear, transformed, type_noise):
 
 if __name__ == '__main__':
 
-    I = cv2.imread('./images/b&w/cameraman.tif', -1)
+    I = cv2.imread('./images/b&w/cameraman.tif')
     for type_noise in Noise:
         I_noise = add_noise(I, type_noise)
         # Denoising
         linear = guided_denoising(I_noise)
-        transformed = wavelet_denoising(I_noise)
         non_linear = anisotropic_denoising(I_noise)
+        transformed = wavelet_denoising(I_noise)
         images_comparation(I, I_noise, linear, non_linear, transformed, type_noise)
 
     I = cv2.imread('./images/rgb/peppers.png')
@@ -72,8 +72,8 @@ if __name__ == '__main__':
         I_noise = add_noise(I, type_noise)
         # Denoising
         linear = guided_denoising(I_noise)
-        transformed = wavelet_denoising(I_noise)
         non_linear = anisotropic_denoising(I_noise)
+        transformed = wavelet_denoising(I_noise)
         images_comparation(I, I_noise, linear, non_linear, transformed, type_noise)
     plt.show()
 
