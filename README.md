@@ -1,4 +1,4 @@
-# ElaborazioneImmagini
+# Elaborazione di Immagini
 
 ## Team 
 
