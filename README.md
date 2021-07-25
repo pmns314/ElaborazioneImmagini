@@ -11,6 +11,7 @@ Vincenzo Salvati - 0622701550 - v.salvati10@studenti.unisa.it
 ## Filters
 
 Implementation of filters for denoising.
+
 In particular:
 - Linear Filter: **Guided filter**;
 - Non-Linear Filter: **Anisotropic filter**;
