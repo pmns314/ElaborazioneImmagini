@@ -17,7 +17,7 @@ def anisodiff(img, kappa=0.2, option=1, neightborhood='minimal'):
      * Se neightborhood = 'maximal' l'algoritmo considera delle variazioni dell'immagine lungo le direzioni {N,S,E,W,NE,NW,SE,SW}
     :return: immagine filtrata
     """
-    imgout = sk.img_as_float(img.copy())
+    imgout = im2double(img.copy())
 
     if neightborhood == 'minimal':
 
@@ -139,11 +139,11 @@ def anisodiff(img, kappa=0.2, option=1, neightborhood='minimal'):
     return imgout
 
 
-def aniso(image, number_iteration, kappas, option=1, neightborhood='minimal', single_threshold=True):
+def aniso(image, number_iteration, kappas, option, neightborhood, single_threshold):
     """
         Realizza il filtraggio anisotropico di un immagine considerando un numero specifico di iterazioni
-        :param img : immagine in scala di grigio di cui si vuole eseguire il filtraggio anisotropico
-        :param kappa: soglia del gradiente
+        :param image: immagine in scala di grigio di cui si vuole eseguire il filtraggio anisotropico
+        :param kappas: soglia del gradiente
         :param option: scelta della funzione di conducibilità
         * Se option = 1 viene scelta come funzione di couducibilità quella esponenziale
         * Se option = 2 viene scelta come funzione di couducibilità quella quadratica
@@ -166,7 +166,7 @@ def aniso(image, number_iteration, kappas, option=1, neightborhood='minimal', si
     return I
 
 
-def anisoRGB(image, it_R, it_G, it_B, k_R, k_G, k_B, option=1, neightborhood='minimal', single_threshold=True):
+def anisoRGB(image, it_R, it_G, it_B, k_R, k_G, k_B, option, neightborhood, single_threshold):
     """
     Filtraggio anisotropico su un immagine RGB
     :param image: immagine RGB
@@ -195,6 +195,25 @@ def anisoRGB(image, it_R, it_G, it_B, k_R, k_G, k_B, option=1, neightborhood='mi
 
 def anisotropic_denoising(image, iterations=None, kappas=None, option=1, neighbourhood='minimal',
                           single_threshold=True):
+    """
+    Filtraggio anisotropico su un'immagine
+    :param image:  immagine da filtrare
+    :param iterations: numero di iterazioni. Può essere un intero o una lista di 3 elementi, uno per ogni canale
+                       dell'immagine a colori.Opzionale: se non specificato, verrà calcolato in automatico
+    :param kappas: soglia del gradiente sul canale. Può essere un intero o una lista di 3 elementi, uno per ogni canale
+                   dell'immagine a colori.Opzionale, se non specificato verrà calcolato in automatico
+    :param option: scelta della funzione di conducibilità
+    * Se option = 1 viene scelta come funzione di couducibilità quella esponenziale
+    * Se option = 2 viene scelta come funzione di couducibilità quella quadratica
+    :param neighbourhood:
+     * Se neighbourhood = 'minimal' l'algoritmo considera solo delle variazioni dell'immagine lungo le direzioni {N,S,E,W}
+     * Se neighbourhood = 'maximal' l'algoritmo considera delle variazioni dell'immagine lungo le direzioni {N,S,E,W,NE,NW,SE,SW}
+    :param single_threshold:
+    * Se single_threshold = True: utilizza un'unica soglia per canale
+    * se single_threshold = False: utilizza più soglie per ogni canale
+    :return immagine filtrata:
+    """
+
     if iterations is None and kappas is not None or iterations is not None and kappas is None:
         raise Exception(' Error: iterations or kappas not found')
     automatic = True if iterations is None and kappas is None else False
@@ -313,7 +332,7 @@ def gradient_magnitude(image):
     :param image: immagine di cui si vuole calcolare il gradiente:
     :return: gradiente dell'immagine
     """
-    I = sk.img_as_float(image.copy())
+    I = im2double(image.copy())
     gx, gy = gradient_xy(I)
     return np.sqrt(gx ** 2 + gy ** 2)
 
@@ -324,7 +343,7 @@ def gradient_xy(image):
     :param image: immagine di cui si vuole calcolare gx e gy
     :return: gx e gy
     """
-    I = sk.img_as_float(image.copy())
+    I = im2double(image.copy())
     gx = cv2.Sobel(I, -1, 1, 0, ksize=3, borderType=cv2.BORDER_REPLICATE)
     gy = cv2.Sobel(I, -1, 0, 1, ksize=3, borderType=cv2.BORDER_REPLICATE)
     return gx, gy

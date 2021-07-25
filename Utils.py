@@ -23,16 +23,6 @@ def show_image(image, title):
     plt.title(title)
 
 
-def display(image, title=''):
-    """ Display image through OpenCV """
-    cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
-    cv2.imshow(title, image)
-    h, w = image.shape[0:2]
-    neww = 400
-    newh = int(neww * (h / w))
-    cv2.resizeWindow(title, neww, newh)
-
-
 def evaluate(imageA, imageB, rgb_flag):
     imageA = im2double(imageA)
     imageB = im2double(imageB)

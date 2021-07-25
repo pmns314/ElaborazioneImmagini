@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
         for levels in range(1, levels_tot + 1):
             de_image_neigh = wavelet_denoising(I_noise, wname=wname, levels=levels)
-            # plot_images_levels_test(image, I_noise, type_noise, de_image_neigh, levels)
+            plot_images_levels_test(image, I_noise, type_noise, de_image_neigh, levels)
             print("level = " + str(levels) + ":\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % (
                 evaluate(image, de_image_neigh, False if get_channels_number(image) == 1 else True)))
-    plt.show()
+        plt.show()

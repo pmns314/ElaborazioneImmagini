@@ -38,16 +38,16 @@ if __name__ == '__main__':
             # iteration of epsilon
             for i in np.arange(0.01, 5.81, 0.2):
                 # initialization MSE for all images in the directory, all noises, but for each epsilon
-                m = 0;  # used for guided filter with mean and variance
-                m_2 = 0;  # used for guided filter with OpenCV
+                m = 0  # used for guided filter with mean and variance
+                m_2 = 0  # used for guided filter with OpenCV
 
                 # initialization PSNR for all images in the directory, all noises, but for each epsilon
-                p = 0;  # used for guided filter with mean and variance
-                p_2 = 0;  # used for guided filter with OpenCV
+                p = 0  # used for guided filter with mean and variance
+                p_2 = 0  # used for guided filter with OpenCV
 
                 # initialization SSIM for all images in the directory, all noises, but for each epsilon
-                s = 0;  # used for guided filter with mean and variance
-                s_2 = 0;  # used for guided filter with OpenCV
+                s = 0  # used for guided filter with mean and variance
+                s_2 = 0  # used for guided filter with OpenCV
 
                 # sum of each MSE, PSNR and SSIM in order to evaluate the mean of them
                 for j in range(0, num_iteration):
@@ -72,7 +72,7 @@ if __name__ == '__main__':
                                  False if get_channels_number(I) == 1 else True)[2]
                 # results
                 print("Numero di iterazioni effettuate: " + str(num_iteration))
-                print("Epsilon = %.2f" % (i))
+                print("Epsilon = %.2f" % i)
                 print("Mean and variance    =   MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f" % (
                     m / num_iteration, p / num_iteration, s / num_iteration))
                 print("OpenCV               =   MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f\n" % (

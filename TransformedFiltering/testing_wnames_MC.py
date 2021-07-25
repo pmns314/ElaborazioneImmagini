@@ -12,7 +12,7 @@ if __name__ == '__main__':
             I_noise.append(add_noise(I, type_noise))
         # Add Noise
         l=[]
-        for wname in pywt.wavelist(kind="discrete")[10:]:
+        for wname in pywt.wavelist(kind="discrete"):
             a = 0
             for x in range(10):
                 de_image_neigh = wavelet_denoising(I_noise[x], wname=wname, levels=pywt.dwtn_max_level(I_noise[x].shape[:-1], wname))

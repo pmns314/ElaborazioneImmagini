@@ -71,7 +71,7 @@ def compare_threshold_techniques(image_true, image_test):
 
 
 # la scelta tra la modalità minimal e maximal non influisce di molto nel filtraggio
-def compare_neightborhood(image_true, image_test, num_it, kappa):
+def compare_neighbourhood(image_true, image_test, num_it, kappa):
     """
     Confronta le modalità del filtraggio anisotropico
     :param image_true: immagine vera
@@ -106,5 +106,5 @@ if __name__ == '__main__':
     compare_threshold_techniques(im2, I2)
     print('-----------------------------------------')
     print('    ----COMPARE NEIGHTBORHOOD----')
-    compare_neightborhood(im, I, 1, 0.2)
+    compare_neighbourhood(im, I, 1, 0.2)
     print('-----------------------------------------')

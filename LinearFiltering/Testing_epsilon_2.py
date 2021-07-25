@@ -55,16 +55,16 @@ if __name__ == '__main__':
     # iteration of epsilon
     for i in np.arange(0.01, 5.81, 0.2):
         # initialization MSE for all images in the directory, all noises, but for each epsilon
-        m = 0;  # used for guided filter with mean and variance
-        m_2 = 0;  # used for guided filter with OpenCV
+        m = 0  # used for guided filter with mean and variance
+        m_2 = 0  # used for guided filter with OpenCV
 
         # initialization PSNR for all images in the directory, all noises, but for each epsilon
-        p = 0;  # used for guided filter with mean and variance
-        p_2 = 0;  # used for guided filter with OpenCV
+        p = 0  # used for guided filter with mean and variance
+        p_2 = 0  # used for guided filter with OpenCV
 
         # initialization SSIM for all images in the directory, all noises, but for each epsilon
-        s = 0;  # used for guided filter with mean and variance
-        s_2 = 0;  # used for guided filter with OpenCV
+        s = 0  # used for guided filter with mean and variance
+        s_2 = 0  # used for guided filter with OpenCV
 
         # iteration images with noise which, individually, are intended both as images with noise and guided images
         for I in noised_images:
@@ -92,7 +92,7 @@ if __name__ == '__main__':
                 num_noise) + "\nNumero di immagini su cui è stata effettuate la valutazione: " + str(
                 num_image) + "\nNumero di iterazioni effettuate: " + str(num_iteration))
         n = num_noise * num_image * num_iteration
-        print("Epsilon = %.2f" % (i))
+        print("Epsilon = %.2f" % i)
         print("Mean and variance    =   MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f" % (m / n, p / n, s / n))
         print("OpenCV               =   MSE: %.2f \t PSNR: %.2f \t SSIM: %.2f\n" % (m_2 / n, p_2 / n, s_2 / n))
     # end

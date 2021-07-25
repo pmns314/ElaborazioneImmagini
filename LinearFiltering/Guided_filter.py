@@ -4,6 +4,7 @@ from Utils import *
 
 def compare_images(I_original, I_noisy, noisy, I_filtred, I_filtred_CV):
     """ Plots the four images passed and computes the mse, psnr and ssim indexes"""
+    I_original = im2double(I_original)
     # creation plot
     fig = plt.figure()
     # plot original image
@@ -87,43 +88,23 @@ def guided_filter_OpenCV(I_guid, I_noisy, epsil=0.01, nhoodSize=3):
 
 if __name__ == "__main__":
     # load image
-    # img = cv2.imread('../images/b&w/cameraman.tif', -1)
-    # img = cv2.imread('../images/rgb/peppers.png')
-    # img = cv2.imread('../images/rgb/caster-RGB.tif')
-    img = cv2.imread('../images/rgb/cat.jpg')
+    I = cv2.imread('../images/b&w/cameraman.tif', -1)
+    for type_noise in Noise:
+        # filtering with gaussian noise
+        I_noise = add_noise(I, type_noise)
+        # show_image(I_noise, 'Immagine con rumore Gaussiano')
+        I_fil_guid = im2double(guided_filter(I_noise, I_noise))
+        I_fil_guid_OpenCV = im2double(guided_filter_OpenCV(I_noise, I_noise))
+        compare_images(I, I_noise, type_noise.value, I_fil_guid, I_fil_guid_OpenCV)
 
-    # image to double
-    if img.ndim == 2:
-        I = im2double(img)
-    else:
-        I = im2double(img[:, :, 2::-1])
-
-    # filtering with gaussian noise
-    I_g = im2double(add_noise(I, Noise.GAUSSIAN))
-    # show_image(I_g, 'Immagine con rumore Gaussiano')
-    I_fil_guid = im2double(guided_filter(I_g, I_g))
-    I_fil_guid_OpenCV = im2double(guided_filter_OpenCV(I_g, I_g))
-    compare_images(I, I_g, 'Gaussiano', I_fil_guid, I_fil_guid_OpenCV)
-
-    # filtering with salt and pepper noise
-    I_sp = im2double(add_noise(I, Noise.SALT_AND_PEPPER))
-    # show_image(I_sp, 'Immagine con rumore Sale e Pepe')
-    I_fil_guid = im2double(guided_filter(I_sp, I_sp))
-    I_fil_guid_OpenCV = im2double(guided_filter_OpenCV(I_sp, I_sp))
-    compare_images(I, I_sp, 'Sale e Pepe', I_fil_guid, I_fil_guid_OpenCV)
-
-    # filtering with poisson noise
-    I_poi = im2double(add_noise(I, Noise.POISSON))
-    # show_image(I_poi, 'Poisson')
-    I_fil_guid = im2double(guided_filter(I_poi, I_poi))
-    I_fil_guid_OpenCV = im2double(guided_filter_OpenCV(I_poi, I_poi))
-    compare_images(I, I_poi, 'Poisson', I_fil_guid, I_fil_guid_OpenCV)
-
-    # filtering with speckle noise
-    I_spe = im2double(add_noise(I, Noise.SPECKLE))
-    # show_image(I_spe, 'Speckle')
-    I_fil_guid = im2double(guided_filter(I_spe, I_spe))
-    I_fil_guid_OpenCV = im2double(guided_filter_OpenCV(I_spe, I_spe))
-    compare_images(I, I_spe, 'Speckle', I_fil_guid, I_fil_guid_OpenCV)
+    I = cv2.imread('../images/rgb/peppers.png')
+    I = bgr2rgb(I)
+    for type_noise in Noise:
+        # filtering with gaussian noise
+        I_noise = add_noise(I, type_noise)
+        # show_image(I_noise, 'Immagine con rumore Gaussiano')
+        I_fil_guid = im2double(guided_filter(I_noise, I_noise))
+        I_fil_guid_OpenCV = im2double(guided_filter_OpenCV(I_noise, I_noise))
+        compare_images(I, I_noise, type_noise.value, I_fil_guid, I_fil_guid_OpenCV)
 
     plt.show()

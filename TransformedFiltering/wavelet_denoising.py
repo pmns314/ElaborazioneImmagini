@@ -2,7 +2,6 @@
 
 import math
 import warnings
-
 import pywt
 import scipy.signal as ss
 from Utils import *
@@ -230,13 +229,13 @@ if __name__ == '__main__':
 
     plot_images_test(I, I_noise, type_noise, de_image_univ, de_image_neigh)
 
-    print("Univ:\tMSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % evaluate(I, de_image_univ,
-                                                                          False if get_channels_number(
-                                                                              I) == 1 else True))
+    print("Univ:\tMSE: %.2f   - PSNR: %.2f  - SSIM: %.2f" % evaluate(I, de_image_univ,
+                                                                     False if get_channels_number(
+                                                                         I) == 1 else True))
 
-    print("Neigh:\tMSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % evaluate(I, de_image_neigh,
-                                                                           False if get_channels_number(
-                                                                               I) == 1 else True))
+    print("Neigh:\tMSE: %.2f   - PSNR: %.2f   - SSIM: %.2f" % evaluate(I, de_image_neigh,
+                                                                       False if get_channels_number(
+                                                                           I) == 1 else True))
     print("------------------- RGB image --------------------------")
     I = cv2.imread('../images/rgb/peppers.png')
     type_noise = Noise.GAUSSIAN
@@ -248,12 +247,9 @@ if __name__ == '__main__':
 
     plot_images_test(I, I_noise, type_noise, de_image_univ, de_image_neigh)
 
-    print("Univ:\tMSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % evaluate(I, de_image_univ,
-                                                                          False if get_channels_number(
-                                                                              I) == 1 else True))
+    print("Univ:\tMSE: %.2f   - PSNR: %.2f   - SSIM: %.2f" % evaluate(I, de_image_univ,
+                                                                      False if get_channels_number(I) == 1 else True))
 
-    print("Neigh:\tMSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % evaluate(I, de_image_neigh,
-                                                                           False if get_channels_number(
-                                                                               I) == 1 else True))
+    print("Neigh:\tMSE: %.2f   - PSNR: %.2f   - SSIM: %.2f" % evaluate(I, de_image_neigh,
+                                                                       False if get_channels_number(I) == 1 else True))
     plt.show()
-    cv2.waitKey(0)
