@@ -15,7 +15,7 @@ Implementation of filters for denoising. In particular:
 - Non-Linear Filter: Anisotropic filter
 - Trasformed Filter: Filter based on transform
 
-#Directory
+## Directory
 
 - images: contenins both b&w and rgb images
 - LinearFiltering: contains the implementation of the filter and other scripts useful its testing;
