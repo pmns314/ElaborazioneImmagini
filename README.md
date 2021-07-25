@@ -4,7 +4,7 @@
 
 Dario Civale - 0622701620 - d.civale1@studenti.unisa.it
 
-Paolo Mansi - 0622701542
+Paolo Mansi - 0622701542 - p.mansi5@studenti.unisa.it
 
 Vincenzo Salvati - 0622701550 - v.salvati10@studenti.unisa.it
 
