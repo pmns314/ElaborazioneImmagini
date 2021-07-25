@@ -3,7 +3,7 @@ import os
 from Guided_filter import guided_filter, guided_filter_OpenCV
 from Utils import *
 
-# Evaluation of epsilon for each image in which is applied the noise
+# evaluation of epsilon for each image in which is applied the noise
 if __name__ == '__main__':
     # assignment directory
     directory = '../images/b&w'
@@ -18,9 +18,9 @@ if __name__ == '__main__':
         print("Immagine = %s" % filename)
         f = os.path.join(directory, filename)
 
-        # Read Image B&W
+        # read image B&W
         I = cv2.imread(f, -1)
-        # Read Image RGB
+        # read image RGB
         # I = cv2.imread(f)
 
         # BRG to RGB

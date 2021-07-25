@@ -3,7 +3,7 @@ import os
 from Guided_filter import guided_filter, guided_filter_OpenCV
 from Utils import *
 
-# Evaluation of epsilon for each image in which is applied the noise altogether
+# evaluation of epsilon for each image in which is applied the noise altogether
 if __name__ == '__main__':
     # assignment directory
     # directory = '../images/b&w'

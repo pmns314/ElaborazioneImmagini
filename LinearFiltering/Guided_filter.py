@@ -86,13 +86,16 @@ def guided_filter_OpenCV(I_guid, I_noisy, epsil=0.01, nhoodSize=3):
         return cv2.ximgproc.guidedFilter(np.uint8(I_guid_uint8), np.uint8(I_noisy_uint8), nhoodSize, epsil)
 
 
+def guided_denoising(I_noise, epsil=0.01, nhoodSize=3):
+    return guided_filter(I_noise, I_noise, epsil, nhoodSize)
+
+
 if __name__ == "__main__":
-    # load image
+
     I = cv2.imread('../images/b&w/cameraman.tif', -1)
     for type_noise in Noise:
-        # filtering with gaussian noise
         I_noise = add_noise(I, type_noise)
-        # show_image(I_noise, 'Immagine con rumore Gaussiano')
+        # show_image(I_noise, 'Immagine con rumore ' + type_noise.value)
         I_fil_guid = im2double(guided_filter(I_noise, I_noise))
         I_fil_guid_OpenCV = im2double(guided_filter_OpenCV(I_noise, I_noise))
         compare_images(I, I_noise, type_noise.value, I_fil_guid, I_fil_guid_OpenCV)
@@ -100,9 +103,8 @@ if __name__ == "__main__":
     I = cv2.imread('../images/rgb/peppers.png')
     I = bgr2rgb(I)
     for type_noise in Noise:
-        # filtering with gaussian noise
         I_noise = add_noise(I, type_noise)
-        # show_image(I_noise, 'Immagine con rumore Gaussiano')
+        # show_image(I_noise, 'Immagine con rumore ' + type_noise.value)
         I_fil_guid = im2double(guided_filter(I_noise, I_noise))
         I_fil_guid_OpenCV = im2double(guided_filter_OpenCV(I_noise, I_noise))
         compare_images(I, I_noise, type_noise.value, I_fil_guid, I_fil_guid_OpenCV)
