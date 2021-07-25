@@ -17,7 +17,7 @@ Implementation of filters for denoising. In particular:
 
 ## Directory
 
-- _images_: contenins both b&w and rgb images
+- _images_: contanins both b&w and rgb images
 - _LinearFiltering_: contains the implementation of the filter and other scripts useful its testing;
 - _NonLinearFiltering_: contains the implementation of the filter and other scripts useful its testing;
 - _TrasformedFiltering_: contains the implementation of the filter and other scripts useful its testing.
