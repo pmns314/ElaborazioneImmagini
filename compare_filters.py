@@ -1,4 +1,3 @@
-
 from Utils import *
 from LinearFiltering.Guided_filter import guided_filter, guided_filter_OpenCV
 from TransformedFiltering.wavelet_denoising import wavelet_denoising
@@ -66,7 +65,7 @@ if __name__ == '__main__':
         # Denoising
         linear = guided_filter_OpenCV(I_noise, I_noise)
         transformed = wavelet_denoising(I_noise)
-        #non_linear = aniso(I_noise, 5, 0.3)
+        # non_linear = aniso(I_noise, 5, 0.3)
         non_linear = anisoRGB(I_noise, 5, 5, 5, 0.3, 0.3, 0.3)
 
         images_comparation(I, I_noise, linear, non_linear, transformed, type_noise)

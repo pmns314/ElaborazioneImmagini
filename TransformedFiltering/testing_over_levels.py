@@ -35,14 +35,14 @@ def plot_images_levels_test(I_original, I_noisy, noisy, I_filtered, level):
 if __name__ == '__main__':
 
     # Read Image
-    image = cv2.imread('../images/rgb/iris-cropped-RGB.tif')
-    type_noise = Noise.GAUSSIAN
+    image = cv2.imread('../images/rgb/peppers.png')
+    type_noise = Noise.SALT_AND_PEPPER
 
     # Add Noise
     I_noise = add_noise(image, type_noise)
 
     # Definizione Parametri
-    wname = "coif5"
+    wname = "db10"
     levels_tot = pywt.dwtn_max_level(I_noise.shape[:-1], wname)
 
     for levels in range(1, levels_tot + 1):

@@ -1,8 +1,9 @@
 """ Mansi Paolo mat. 0622701542"""
 
 import math
+import warnings
+
 import pywt
-import skimage.util
 import scipy.signal as ss
 from Utils import *
 
@@ -76,13 +77,13 @@ def get_universal_threshold(coeff):
 
 
 def denoising_coefficients(coeff, mode, dim_neigh):
-    """ Performs the denoising of the wavelets coefficients, either with the universal threshold or with the neighbouring
+    """ Performs the denoising of the wavelets coefficients, either with the universal threshold or with  neighbouring
 
     :param coeff - the coefficients of the wavelet decomposition
     :param mode - specifies if using the universal threshold or the neighbouring
     :param dim_neigh - in case of the neighbouring, it defines the dimension of the window of the neighbourhood
     """
-
+    warnings.filterwarnings("ignore")
     # Get Threshold
     univ_thr = get_universal_threshold(coeff)
 
@@ -137,15 +138,16 @@ def _denoising(image, wname, levels, ch, mode, dim_neigh, show):
     return pywt.waverec2(denoised_coeff, wname)
 
 
-def wavelet_denoising(image, wname='db2', levels=None, mode='neigh', dim_neigh=3, show=False):
+def wavelet_denoising(image, wname='db10', levels=None, mode='neigh', dim_neigh=3, show=False):
     """
     Performs the denoising of the image passed through the thresholding of the wavelet decomposition
 
     :param image: the image to be denoised
-    :param wname: the name of the wavelet used to decompose
-    :param levels: the number of levels of the decomposition
-    :param mode: the mode of the thresholding
-    :param dim_neigh: the dimension of the neighbourhood
+    :param wname: the name of the wavelet used to decompose. By default it uses the 'db10' wavelet
+    :param levels: the number of levels of the decomposition. if it's not chosen, it will be assigned 5 if possible, or
+                    else the maximum number of levels
+    :param mode: the mode of the thresholding. By default it's the neighbouring threshold
+    :param dim_neigh: the dimension of the neighbourhood. By default it's a 3x3 window
     :param show: a boolean flag. if True, it shows the Wavelet decomposition
     :returns: the denoised image
     """
