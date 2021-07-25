@@ -1,7 +1,7 @@
 from Utils import *
 from LinearFiltering.Guided_filter import guided_filter, guided_filter_OpenCV
 from TransformedFiltering.wavelet_denoising import wavelet_denoising
-from NonLinearFiltering.anysotropic import aniso, anisoRGB
+from NonLinearFiltering.anisotropic import anisotropic_denoising
 
 
 def images_comparation(I, I_noise, linear, non_linear, transformed, type_noise):
@@ -57,17 +57,24 @@ def images_comparation(I, I_noise, linear, non_linear, transformed, type_noise):
 
 
 if __name__ == '__main__':
-    # Reading image
-    I = cv2.imread('./images/rgb/peppers.png', -1)
-
+    # Reading image b&w
+    I = cv2.imread('./images/b&w/cameraman.tif', -1)
     for type_noise in Noise:
-        I_noise = add_noise(I, type_noise, sigma_g=0.2)
+        I_noise = add_noise(I, type_noise)
         # Denoising
-        linear = guided_filter_OpenCV(I_noise, I_noise)
+        linear = guided_filter(I_noise, I_noise)
         transformed = wavelet_denoising(I_noise)
-        # non_linear = aniso(I_noise, 5, 0.3)
-        non_linear = anisoRGB(I_noise, 5, 5, 5, 0.3, 0.3, 0.3)
-
+        non_linear = anisotropic_denoising(I_noise)
         images_comparation(I, I_noise, linear, non_linear, transformed, type_noise)
 
+    I = cv2.imread('./images/rgb/peppers.png')
+    for type_noise in Noise:
+        I_noise = add_noise(I, type_noise)
+        # Denoising
+        linear = guided_filter(I_noise, I_noise)
+        transformed = wavelet_denoising(I_noise)
+        non_linear = anisotropic_denoising(I_noise)
+        images_comparation(I, I_noise, linear, non_linear, transformed, type_noise)
     plt.show()
+
+

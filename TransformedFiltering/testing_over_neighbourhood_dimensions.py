@@ -41,7 +41,7 @@ if __name__ == '__main__':
     I_noise = add_noise(I, type_noise)
 
     # Definizione Parametri
-    for N in range(1, 10):
+    for N in range(2, 11):
         de_image_neigh = wavelet_denoising(I_noise, dim_neigh=N)
         # plot_images_neighbourhood_test(I, I_noise, type_noise, de_image_neigh, N)
         print("N = " + str(N) + ":\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % (

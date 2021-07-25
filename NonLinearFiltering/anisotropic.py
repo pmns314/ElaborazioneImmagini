@@ -1,22 +1,20 @@
-import numpy as np
-import cv2
-import skimage as sk
 from scipy import stats
 from skimage.restoration import estimate_sigma
 from NonLinearFiltering.Morphological import morphological_open, morphological_close
+from Utils import *
 
 
 def anisodiff(img, kappa=0.2, option=1, neightborhood='minimal'):
     """
-    Realizza il filtraggio anisotropico di un immagine
-    :param img : immagine di cui si vuole eseguire il filtraggio anisotropico
+    Realizza il filtraggio anisotropico di un immagine effettuando una singola iterazione
+    :param img : immagine in scala di grigio di cui si vuole eseguire il filtraggio anisotropico
     :param kappa: soglia del gradiente
     :param option: scelta della funzione di conducibilità
     * Se option = 1 viene scelta come funzione di couducibilità quella esponenziale
     * Se option = 2 viene scelta come funzione di couducibilità quella quadratica
     :param neightborhood:
-     * Se neightborhood = 'minimal' l'algoritmo tiene conto solo delle variazioni dell'immagine lungo le direzioni {N,S,E,W}
-     * Se neightborhood = 'maximal' l'algoritmo tiene conto delle variazioni dell'immagine lungo le direzioni {N,S,E,W,NE,NW,SE,SW}
+     * Se neightborhood = 'minimal' l'algoritmo considera solo delle variazioni dell'immagine lungo le direzioni {N,S,E,W}
+     * Se neightborhood = 'maximal' l'algoritmo considera delle variazioni dell'immagine lungo le direzioni {N,S,E,W,NE,NW,SE,SW}
     :return: immagine filtrata
     """
     imgout = sk.img_as_float(img.copy())
@@ -42,14 +40,6 @@ def anisodiff(img, kappa=0.2, option=1, neightborhood='minimal'):
         deltaE[:, :-1] = np.diff(imgout, axis=1)
         deltaN[1:, :] = -deltaS[:-1, :]
         deltaW[:, 1:] = -deltaE[:, :-1]
-
-        """   
-         Funzioni di conducibilità
-         definiamo delta = grad(I(x,y,t) dove I è l'immagine all'istante t di iterazione e consideriamo una generica 
-         variazione lungo un qualsiasi direzione all'interno della matrice delta, dx = delta(x,y)
-         * dx<k => smoothing (dx è considerato come rumore)
-         * dx>k => conservazione degll' edge  
-        """
 
         # scelta della funzione di conducibilità
         if option == 1:
@@ -115,14 +105,14 @@ def anisodiff(img, kappa=0.2, option=1, neightborhood='minimal'):
 
         if option == 1:
 
-            gS = np.exp(-(np.abs(deltaS) * np.sqrt(5) / np.abs(kappa)) ** 2)
-            gE = np.exp(-(np.abs(deltaE) * np.sqrt(5) / np.abs(kappa)) ** 2)
-            gN = np.exp(-(np.abs(deltaN) * np.sqrt(5) / np.abs(kappa)) ** 2)
-            gW = np.exp(-(np.abs(deltaW) * np.sqrt(5) / np.abs(kappa)) ** 2)
-            gNE = np.exp(-(np.abs(deltaNE) * np.sqrt(5) / np.abs(kappa)) ** 2)
-            gNW = np.exp(-(np.abs(deltaNW) * np.sqrt(5) / np.abs(kappa)) ** 2)
-            gSE = np.exp(-(np.abs(deltaSE) * np.sqrt(5) / np.abs(kappa)) ** 2)
-            gSW = np.exp(-(np.abs(deltaSW) * np.sqrt(5) / np.abs(kappa)) ** 2)
+            gS = np.exp(-(np.abs(deltaS) / np.abs(kappa)) ** 2)
+            gE = np.exp(-(np.abs(deltaE) / np.abs(kappa)) ** 2)
+            gN = np.exp(-(np.abs(deltaN) / np.abs(kappa)) ** 2)
+            gW = np.exp(-(np.abs(deltaW) / np.abs(kappa)) ** 2)
+            gNE = np.exp(-(np.abs(deltaNE) / np.abs(kappa)) ** 2)
+            gNW = np.exp(-(np.abs(deltaNW) / np.abs(kappa)) ** 2)
+            gSE = np.exp(-(np.abs(deltaSE) / np.abs(kappa)) ** 2)
+            gSW = np.exp(-(np.abs(deltaSW) / np.abs(kappa)) ** 2)
 
 
         elif option == 2:
@@ -150,6 +140,21 @@ def anisodiff(img, kappa=0.2, option=1, neightborhood='minimal'):
 
 
 def aniso(image, number_iteration, kappas, option=1, neightborhood='minimal', single_threshold=True):
+    """
+        Realizza il filtraggio anisotropico di un immagine considerando un numero specifico di iterazioni
+        :param img : immagine in scala di grigio di cui si vuole eseguire il filtraggio anisotropico
+        :param kappa: soglia del gradiente
+        :param option: scelta della funzione di conducibilità
+        * Se option = 1 viene scelta come funzione di couducibilità quella esponenziale
+        * Se option = 2 viene scelta come funzione di couducibilità quella quadratica
+        :param neightborhood:
+         * Se neightborhood = 'minimal' l'algoritmo considera solo delle variazioni dell'immagine lungo le direzioni {N,S,E,W}
+         * Se neightborhood = 'maximal' l'algoritmo considera delle variazioni dell'immagine lungo le direzioni {N,S,E,W,NE,NW,SE,SW}
+         :param single_threshold:
+         * Se single_threshold = True: utilizza un'unica soglia
+         * se single_threshold = False: utilizza più soglie diverse ad ogni iterazione
+        :return: immagine filtrata
+        """
     I = image.copy()
     # più è alto il numero di iterazioni più l'immagine risulta sfocata
     if not single_threshold:
@@ -162,10 +167,56 @@ def aniso(image, number_iteration, kappas, option=1, neightborhood='minimal', si
 
 
 def anisoRGB(image, it_R, it_G, it_B, k_R, k_G, k_B, option=1, neightborhood='minimal', single_threshold=True):
+    """
+    Filtraggio anisotropico su un immagine RGB
+    :param image: immagine RGB
+    :param it_R: numero di iterazioni sul canale rosso
+    :param it_G: numero di iterazioni sul canale verde
+    :param it_B: numero di iterazioni sul canale blu
+    :param k_R: soglia del gradiente sul canale rosso
+    :param k_G: soglia del gradiente sul canale verde
+    :param k_B: soglia del gradiente sul canale blu
+    :param option: scelta della funzione di conducibilità
+    * Se option = 1 viene scelta come funzione di couducibilità quella esponenziale
+    * Se option = 2 viene scelta come funzione di couducibilità quella quadratica
+    :param neightborhood:
+     * Se neightborhood = 'minimal' l'algoritmo considera solo delle variazioni dell'immagine lungo le direzioni {N,S,E,W}
+     * Se neightborhood = 'maximal' l'algoritmo considera delle variazioni dell'immagine lungo le direzioni {N,S,E,W,NE,NW,SE,SW}
+    :param single_threshold:
+    * Se single_threshold = True: utilizza un'unica soglia per canale
+    * se single_threshold = False: utilizza più soglie per ogni canale
+    :return immagine filtrata:
+    """
     R = aniso(image[:, :, 0], it_R, k_R, option, neightborhood, single_threshold)
     G = aniso(image[:, :, 1], it_G, k_G, option, neightborhood, single_threshold)
     B = aniso(image[:, :, 2], it_B, k_B, option, neightborhood, single_threshold)
     return np.dstack((R, G, B))
+
+
+def anisotropic_denoising(image, iterations=None, kappas=None, option=1, neighbourhood='minimal',
+                          single_threshold=True):
+    if iterations is None and kappas is not None or iterations is not None and kappas is None:
+        raise Exception(' Error: iterations or kappas not found')
+    automatic = True if iterations is None and kappas is None else False
+    if get_channels_number(image) == 1:
+        if automatic:
+            return aniso(image, *automatic_parameters(image, option, neighbourhood), option, neighbourhood,
+                         False)
+        else:
+            return aniso(image, iterations, kappas, option, neighbourhood, single_threshold)
+    else:
+        if automatic:
+            it_list, kappa_list = automatic_parameters_RGB(image, option, neighbourhood)
+            return anisoRGB(image, *it_list, *kappa_list, option, neighbourhood, False)
+        else:
+            if type(iterations) is int and type(kappas) is float:
+                iterations = [iterations for _ in range(3)]
+                kappas = [kappas for _ in range(3)]
+                return anisoRGB(image, *iterations, *kappas, option, neighbourhood, single_threshold)
+            elif len(iterations) == 3 and len(kappas) == 3:
+                return anisoRGB(image, *iterations, *kappas, option, neighbourhood, single_threshold)
+            else:
+                raise Exception("Wrong parameters!")
 
 
 def automatic_parameters_RGB(image, option, neigthborhood):
@@ -176,10 +227,34 @@ def automatic_parameters_RGB(image, option, neigthborhood):
     :param neigthborhood: direzioni considerate dal filtro anisotropico
     :return: soglia del gradiente e numero di iterazioni per ogni rispettivo canale RGB
     """
-    k_R, it_R = automatic_parameters(image[:, :, 0], option, neigthborhood)
-    k_G, it_G = automatic_parameters(image[:, :, 1], option, neigthborhood)
-    k_B, it_B = automatic_parameters(image[:, :, 2], option, neigthborhood)
-    return k_R, k_G, k_B, it_R, it_G, it_B
+    R_param = automatic_parameters(image[:, :, 0], option, neigthborhood)
+    G_param = automatic_parameters(image[:, :, 1], option, neigthborhood)
+    B_param = automatic_parameters(image[:, :, 2], option, neigthborhood)
+    return [R_param[0], G_param[0], B_param[0]], [R_param[1], G_param[1], B_param[1]]
+
+
+def get_gradient_thresh_MAD_RGB(image):
+    """
+    Stima la soglia del gradiente per ogni canale RGB dell'immagine usando la deviazione assoluta mediana (MAD)
+    :param image: immagine di cui si vuole calcolare le soglie
+    :return: le soglie per ogni canale
+       """
+    thresh_R = get_gradient_thresh_MAD(image[:, :, 0])
+    thresh_G = get_gradient_thresh_MAD(image[:, :, 1])
+    thresh_B = get_gradient_thresh_MAD(image[:, :, 2])
+    return thresh_R, thresh_G, thresh_B
+
+
+def get_gradient_thresh_morpho_RGB(image):
+    """
+    Stima la soglia del gradiente per ogni canale RGB dell'immagine usando un approccio morfologico
+    :param image: immagine di cui si vuole calcolare le soglie
+    :return: la soglie per ogni canale
+       """
+    thresh_R = get_gradient_thresh_morpho(image[:, :, 0])
+    thresh_G = get_gradient_thresh_morpho(image[:, :, 1])
+    thresh_B = get_gradient_thresh_morpho(image[:, :, 2])
+    return thresh_R, thresh_G, thresh_B
 
 
 def get_gradient_threshold(image):
@@ -397,8 +472,8 @@ def automatic_parameters(image, option, neightborhood):
     :param neightborhood: direzioni considerate dal filtro anisotropico
     :return: soglia del gradiente e numero di iterazioni
     """
-    max_iteration = 100  # parametro letteratura
-    num_edge = 200  # parametro letteratura
+    max_iteration = 100
+    num_edge = 200
     thresh = 1 / 35 * min(image.shape[0], image.shape[1])  # parametro  letteratura
     I = image.copy()
     Q = np.zeros([max_iteration, num_edge])
@@ -443,4 +518,4 @@ def automatic_parameters(image, option, neightborhood):
             if average[current_iteration - 1] < average[current_iteration - 2] or current_iteration == max_iteration:
                 break
         current_iteration += 1
-    return kappas, current_iteration
+    return [current_iteration, kappas]

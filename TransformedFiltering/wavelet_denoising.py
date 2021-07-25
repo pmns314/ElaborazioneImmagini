@@ -7,6 +7,11 @@ import pywt
 import scipy.signal as ss
 from Utils import *
 
+DEFAULT_LEVEL_NUMBER = 4
+DEFAULT_WNAME = 'db10'
+DEFAULT_MODE = 'neigh'
+DEFAULT_NEIGH_DIM = 3
+
 
 def show_image_from_coefficients(coeffs, title=None):
     """ Given the coefficients, it shows the wavelet decomposition"""
@@ -138,7 +143,8 @@ def _denoising(image, wname, levels, ch, mode, dim_neigh, show):
     return pywt.waverec2(denoised_coeff, wname)
 
 
-def wavelet_denoising(image, wname='db10', levels=None, mode='neigh', dim_neigh=3, show=False):
+def wavelet_denoising(image, wname=DEFAULT_WNAME, levels=None, mode=DEFAULT_MODE, dim_neigh=DEFAULT_LEVEL_NUMBER,
+                      show=False):
     """
     Performs the denoising of the image passed through the thresholding of the wavelet decomposition
 
@@ -154,7 +160,9 @@ def wavelet_denoising(image, wname='db10', levels=None, mode='neigh', dim_neigh=
     channels = get_channels_number(image)
     if levels is None:
         levels = pywt.dwtn_max_level(image.shape[:-1], wname)
-        levels = 5 if levels >= 5 else levels
+        levels = DEFAULT_LEVEL_NUMBER if levels >= DEFAULT_LEVEL_NUMBER else levels
+    elif levels == 'max':
+        levels = pywt.dwtn_max_level(image.shape[:-1], wname)
     if channels == 1:
         im = _denoising(image, wname, levels, -1, mode, dim_neigh, show)
     else:
@@ -211,7 +219,26 @@ def plot_images_test(I_original, I_noisy, noisy, I_filtred_univ, I_filtred_neigh
 
 
 if __name__ == '__main__':
-    I = cv2.imread('../images/rgb/peppers.png', -1)
+    print("------------------------- Black and white image --------------------")
+    I = cv2.imread('../images/b&w/Napoli.tif', -1)
+    type_noise = Noise.GAUSSIAN
+    I_noise = add_noise(I, type_noise)
+
+    # Denoise
+    de_image_neigh = wavelet_denoising(I_noise, mode='neigh', show=False)
+    de_image_univ = wavelet_denoising(I_noise, mode='univ', show=False)
+
+    plot_images_test(I, I_noise, type_noise, de_image_univ, de_image_neigh)
+
+    print("Univ:\tMSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % evaluate(I, de_image_univ,
+                                                                          False if get_channels_number(
+                                                                              I) == 1 else True))
+
+    print("Neigh:\tMSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % evaluate(I, de_image_neigh,
+                                                                           False if get_channels_number(
+                                                                               I) == 1 else True))
+    print("------------------- RGB image --------------------------")
+    I = cv2.imread('../images/rgb/peppers.png')
     type_noise = Noise.GAUSSIAN
     I_noise = add_noise(I, type_noise)
 
