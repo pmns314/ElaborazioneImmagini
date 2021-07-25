@@ -1,3 +1,4 @@
+""" Civale Dario mat 0622701620 """
 from scipy import stats
 from skimage.restoration import estimate_sigma
 from NonLinearFiltering.Morphological import morphological_open, morphological_close
