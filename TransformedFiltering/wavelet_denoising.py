@@ -75,7 +75,9 @@ def get_universal_threshold(coeff):
     A = np.array([np.concatenate(([*coeff]), axis=None)])
     n = ((coeff[0][1]).shape[0])
     X = A[:, n ** 2 + 1:]
+    # Calculate sigma = MAD/0.6745
     sigma = np.median(np.abs(X)) / 0.6745
+    # Calculate universal threshold
     thr = sigma * math.sqrt(2 * math.log((n * 2) ** 2))
     return thr
 
@@ -94,6 +96,7 @@ def denoising_coefficients(coeff, mode, dim_neigh):
     if mode == 'univ':
         for i in range(1, len(coeff)):
             for imm in coeff[i]:
+                # set to 0 the values under the universal threshold
                 imm[abs(imm) < univ_thr] = 0
 
     elif mode == 'neigh':
@@ -102,9 +105,12 @@ def denoising_coefficients(coeff, mode, dim_neigh):
             denoised_coeff = [0, 0, 0]
             for i in range(0, 3):
                 imm = coeff[c][i]
+                # Perform the sum of the elements of the window through the convolution
                 S = ss.convolve2d(imm * imm, mask, 'same')
+                # Calculates the shrinking factor
                 B = 1 - (univ_thr ** 2 / S)
                 B[B < 0] = 0
+                # Update the value of the pixel
                 denoised_coeff[i] = imm * B
             coeff[c] = tuple(denoised_coeff)
     else:
@@ -157,17 +163,22 @@ def wavelet_denoising(image, wname=DEFAULT_WNAME, levels=None, mode=DEFAULT_MODE
     :returns: the denoised image
     """
     channels = get_channels_number(image)
+    # if level is not specified, it is set to the default number
     if levels is None:
         levels = pywt.dwtn_max_level(image.shape[:-1], wname)
         levels = DEFAULT_LEVEL_NUMBER if levels >= DEFAULT_LEVEL_NUMBER else levels
     elif levels == 'max':
         levels = pywt.dwtn_max_level(image.shape[:-1], wname)
+
     if channels == 1:
+        # if the image is b&w the denoising is done on the only existing channel
         im = _denoising(image, wname, levels, -1, mode, dim_neigh, show)
     else:
+        # if the image is rgb, the denoising is done on each channel singularly
         im = np.zeros([*image.shape])
         for c in range(channels):
             res = _denoising(image[:, :, c], wname, levels, c + 1, mode, dim_neigh, show)
+            # Dimensions adjusting
             if res.shape[0] != image.shape[0]:
                 res = res[:-1, :]
             if res.shape[1] != image.shape[1]:
@@ -219,7 +230,7 @@ def plot_images_test(I_original, I_noisy, noisy, I_filtred_univ, I_filtred_neigh
 
 if __name__ == '__main__':
     print("------------------------- Black and white image --------------------")
-    I = cv2.imread('../images/b&w/Napoli.tif', -1)
+    I = cv2.imread('../images/b&w/totem-poles.tif', -1)
     type_noise = Noise.GAUSSIAN
     I_noise = add_noise(I, type_noise)
 
@@ -236,7 +247,7 @@ if __name__ == '__main__':
     print("Neigh:\tMSE: %.2f   - PSNR: %.2f   - SSIM: %.2f" % evaluate(I, de_image_neigh,
                                                                        False if get_channels_number(
                                                                            I) == 1 else True))
-    print("------------------- RGB image --------------------------")
+    print("------------------------- RGB image --------------------------")
     I = cv2.imread('../images/rgb/peppers.png')
     type_noise = Noise.GAUSSIAN
     I_noise = add_noise(I, type_noise)

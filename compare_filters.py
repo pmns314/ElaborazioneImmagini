@@ -57,7 +57,7 @@ def images_comparation(I, I_noise, linear, non_linear, transformed, type_noise):
 
 
 if __name__ == '__main__':
-    # Reading image b&w
+
     I = cv2.imread('./images/b&w/cameraman.tif', -1)
     for type_noise in Noise:
         I_noise = add_noise(I, type_noise)
