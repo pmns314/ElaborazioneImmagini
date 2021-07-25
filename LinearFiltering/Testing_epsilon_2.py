@@ -25,9 +25,9 @@ if __name__ == '__main__':
         # print("Immagine = %s" % filename)
         f = os.path.join(directory, filename)
 
-        # Read Image B&W
+        # read Image B&W
         # I = cv2.imread(f, -1)
-        # Read Image RGB
+        # read Image RGB
         I = cv2.imread(f)
 
         # BRG to RGB
