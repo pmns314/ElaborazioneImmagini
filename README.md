@@ -25,4 +25,4 @@ In particular:
 - _TrasformedFiltering_: contains the implementation of the filter and other scripts useful its testing;
 - _images_: contanins both b&w and rgb images;
 - _Utils.py_: script that implements useful functions called by the filters scripts;
-- _compeare_filters.py_: script to compere the filters altogether.
+- _compare_filters.py_: script to compere the filters altogether.
