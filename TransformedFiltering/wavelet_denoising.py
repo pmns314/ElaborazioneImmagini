@@ -62,6 +62,7 @@ def _plot_wavelet_transform(coeff, ch, pre):
             title = title + '- R'
         else:
             plt.subplot(122)
+    plt.axis("off")
     show_image_from_coefficients(coeff, title)
 
 
@@ -219,7 +220,6 @@ def plot_images_test(I_original, I_noisy, noisy, I_filtred_univ, I_filtred_neigh
     plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (
         evaluate(I_original, I_filtred_univ, False if get_channels_number(I_original) == 1 else True)), loc="left")
 
-    # plot immagine filtrata con OpenCV
     fig.add_subplot(2, 2, 4)
     plt.title("Neigh", fontweight="bold")
     plt.imshow(I_filtred_neigh, cmap='gray')

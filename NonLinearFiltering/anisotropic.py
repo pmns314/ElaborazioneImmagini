@@ -283,11 +283,6 @@ def get_gradient_threshold(image):
     :param image: immagine di cui si vuole calcolare la soglia del gradiente
     :return: la soglia del gradiente
     """
-    # gx = cv2.Sobel(image, -1, 1, 0)
-    # gx = np.abs(gx)
-    # gx = gx / np.max(gx)  # scaling
-    # gx = sk.img_as_ubyte(gx)
-    # hist = cv2.calcHist([gx], [0], None, [256], (0, 256))
     grad = gradient_magnitude(image)
     grad = grad / np.max(grad)
     grad = sk.img_as_ubyte(grad)
