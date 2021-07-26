@@ -16,7 +16,7 @@ In particular:
 
 - Linear Filter: **Guided filter**;
 - Non-Linear Filter: **Anisotropic filter**;
-- Trasformed Filter: **Filter based on transform**.
+- Trasformed Filter: **Filter based on wavelets transformation**.
 
 ## Directory
 - _Documentation_: contains PDF documentation and PowerPoint presentation;
@@ -24,5 +24,5 @@ In particular:
 - _NonLinearFiltering_: contains the implementation of the filter and other scripts useful its testing;
 - _TrasformedFiltering_: contains the implementation of the filter and other scripts useful its testing;
 - _images_: contanins both b&w and rgb images;
-- _Utils.py_: script che implementa funzioni utili richiamate negli script dei filtri;
+- _Utils.py_: script that implements useful functions called by the filters scripts;
 - _compeare_filters.py_: script to compere the filters altogether.
