@@ -16,17 +16,15 @@ def compare_conducibility_function(image_true, image_test, kappa, iter_range, ne
     :return:
     """
     for x in iter_range:
-        if get_channels_number(image_true) == 3:
-            an = anisoRGB(image_test, x, x, x, kappa, kappa, kappa, option=1, neightborhood=neightborhood)
-            an2 = anisoRGB(image_test, x, x, x, kappa, kappa, kappa, option=2, neightborhood=neightborhood)
 
-            print("exponential:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an, True))
-            print("quadratic:  \t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an2, True))
-        else:
-            an = aniso(image_test, x, kappa, option=1, neightborhood=neightborhood)
-            an2 = aniso(image_test, x, kappa, option=2, neightborhood=neightborhood)
-            print("exponential:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an, False))
-            print("quadratic:  \t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an2, False))
+        an1 = anisotropic_denoising(image_true, int(x), kappa, option=1)
+        an2 = anisotropic_denoising(image_true, int(x), kappa, option=2)
+        print("exponential:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an1,
+                                                                                     False if get_channels_number(
+                                                                                         image_test) == 1 else True))
+        print("quadratic:  \t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an2,
+                                                                                     False if get_channels_number(
+                                                                                         image_test) == 1 else True))
 
 
 # La scelta dell'algoritmo di soglia dipende molto dal tipo di elaborazione che si vuole ottenere sull' immagine, in generale algoritmo di soglia adattiva(PERONA-MALIK)  conserva meglio gli edge rispetto
@@ -41,30 +39,24 @@ def compare_threshold_techniques(image_true, image_test):
     number_it = 5
     if get_channels_number(image_true) == 3:
         # PERONA-MALIK
-        k_R, k_G, k_B, it_R, it_G, it_B = automatic_parameters_RGB(image_test, 1, 'minimal')
-        an_PER = anisoRGB(image_test, it_R, it_G, it_B, k_R, k_G, k_B, single_threshold=False)
-
+        an_PER = anisotropic_denoising(image_test)
         # MAD
-        k_MAD_R, K_MAD_G, K_MAD_B = get_gradient_thresh_MAD_RGB(image_test)
-        an_MAD = anisoRGB(image_test, number_it, number_it, number_it, k_MAD_R, K_MAD_G, K_MAD_B)
-
+        an_MAD = anisotropic_denoising(image_test, [number_it for _ in range(3)], [*get_gradient_thresh_MAD_RGB(image_test)])
         # MORPHO
-        k_MORPHO_R, k_MORPHO_G, k_MORPHO_B = get_gradient_thresh_morpho_RGB(image_test)
-        an_MORPHO = anisoRGB(image_test, number_it, number_it, number_it, k_MORPHO_R, k_MORPHO_G, k_MORPHO_B)
+        an_MORPHO = anisotropic_denoising(image_test, [number_it for _ in range(3)], [*get_gradient_thresh_morpho_RGB(image_test)])
         print("PERONA-MALIK:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an_PER, True))
         print("MAD:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an_MAD, True))
         print("MORPHO:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an_MORPHO, True))
 
     else:
         # PERONA-MALIK
-        kappas, it = automatic_parameters(image_test, 1, 'minimal')
-        an_PER = aniso(image_test, it, kappas, single_threshold=False)
+        an_PER = anisotropic_denoising(image_test)
         # MAD
         k_MAD = get_gradient_thresh_MAD(image_test)
-        an_MAD = aniso(image_test, number_it, k_MAD)
+        an_MAD = anisotropic_denoising(image_test, number_it, k_MAD)
         # MORPHO
         k_MORPHO = get_gradient_thresh_morpho(image_test)
-        an_MORPHO = aniso(image_test, number_it, k_MORPHO)
+        an_MORPHO = anisotropic_denoising(image_test, number_it, k_MORPHO)
         print("PERONA-MALIK:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an_PER, False))
         print("MAD:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an_MAD, False))
         print("MORPHO:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an_MORPHO, False))
@@ -80,10 +72,12 @@ def compare_neighbourhood(image_true, image_test, num_it, kappa):
     :param kappa: soglia del gradiente
     :return:
     """
-    an_min = aniso(image_test, num_it, kappa, neightborhood='minimal')
-    an_max = aniso(image_test, num_it, kappa, neightborhood='maximal')
-    print("MINIMAL:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an_min, False))
-    print("MAXIMAL:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an_max, False))
+    an_min = anisotropic_denoising(image_test, num_it, kappa, neighbourhood='minimal')
+    an_max = anisotropic_denoising(image_test, num_it, kappa, neighbourhood='maximal')
+    print("MINIMAL:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an_min, False if get_channels_number(
+                                                                                         image_test) == 1 else True))
+    print("MAXIMAL:\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % evaluate(image_true, an_max, False if get_channels_number(
+                                                                                         image_test) == 1 else True))
     show_image(an_min, 'MIN')
     show_image(an_max, 'MAX')
 
@@ -100,11 +94,11 @@ if __name__ == '__main__':
     im2 = bgr2rgb(im2)
     I2 = im2double(add_noise(im2, Noise.GAUSSIAN, 0.5))
     I2 = bgr2rgb(I2)
-    compare_conducibility_function(im2, I2, 0.8, np.arange(1, 21), 'minimal')
+    compare_conducibility_function(im2, I2, 0.8, list(np.arange(1, 21)), 'minimal')
     print('-----------------------------------------')
     print('    ----COMPARE THRESHOLD----')
-    compare_threshold_techniques(im2, I2)
+    compare_threshold_techniques(im, I)
     print('-----------------------------------------')
     print('    ----COMPARE NEIGHTBORHOOD----')
-    compare_neighbourhood(im, I, 1, 0.2)
+    compare_neighbourhood(im2, I2, 1, 0.2)
     print('-----------------------------------------')

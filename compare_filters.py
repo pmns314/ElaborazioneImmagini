@@ -1,7 +1,7 @@
-from Utils import *
 from LinearFiltering.Guided_filter import guided_denoising
-from TransformedFiltering.wavelet_denoising import wavelet_denoising
 from NonLinearFiltering.anisotropic import anisotropic_denoising
+from TransformedFiltering.wavelet_denoising import wavelet_denoising
+from Utils import *
 
 
 def images_comparation(I, I_noise, linear, non_linear, transformed, type_noise):
@@ -76,5 +76,3 @@ if __name__ == '__main__':
         transformed = wavelet_denoising(I_noise)
         images_comparation(I, I_noise, linear, non_linear, transformed, type_noise)
     plt.show()
-
-

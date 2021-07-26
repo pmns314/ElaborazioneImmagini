@@ -1,10 +1,11 @@
 from enum import Enum
-import numpy as np
-import matplotlib.pyplot as plt
+
 import cv2
-from skimage.metrics import structural_similarity as ssim
-from skimage.metrics import mean_squared_error as mse
+import matplotlib.pyplot as plt
+import numpy as np
 import skimage as sk
+from skimage.metrics import mean_squared_error as mse
+from skimage.metrics import structural_similarity as ssim
 
 
 def im2double(im):

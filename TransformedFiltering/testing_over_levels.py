@@ -35,7 +35,7 @@ def plot_images_levels_test(I_original, I_noisy, noisy, I_filtered, level):
 if __name__ == '__main__':
 
     # Read Image
-    image = cv2.imread('../images/rgb/cat.jpg')
+    image = cv2.imread('../images/rgb/peppers.png')
     for type_noise in Noise:
         print("\n\n Noise: " + type_noise.value)
         # Add Noise
@@ -50,4 +50,4 @@ if __name__ == '__main__':
             plot_images_levels_test(image, I_noise, type_noise, de_image_neigh, levels)
             print("level = " + str(levels) + ":\t\tMSE: %.2f\t    PSNR: %.2f\t    SSIM: %.2f" % (
                 evaluate(image, de_image_neigh, False if get_channels_number(image) == 1 else True)))
-        plt.show()
+    plt.show()

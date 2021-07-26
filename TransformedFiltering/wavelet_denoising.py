@@ -106,7 +106,7 @@ def denoising_coefficients(coeff, mode, dim_neigh):
             for i in range(0, 3):
                 imm = coeff[c][i]
                 # Perform the sum of the elements of the window through the correlation
-                S = cv2.filter2D(imm*imm, -1, mask, borderType=cv2.BORDER_REPLICATE)
+                S = cv2.filter2D(imm * imm, -1, mask, borderType=cv2.BORDER_REPLICATE)
                 # Calculates the shrinking factor
                 B = 1 - (univ_thr ** 2 / S)
                 B[B < 0] = 0
