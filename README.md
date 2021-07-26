@@ -19,8 +19,10 @@ In particular:
 - Trasformed Filter: **Filter based on transform**.
 
 ## Directory
-
-- _images_: contanins both b&w and rgb images;
+- _Documentation_: contains PDF documentation and PowerPoint presentation;
 - _LinearFiltering_: contains the implementation of the filter and other scripts useful its testing;
 - _NonLinearFiltering_: contains the implementation of the filter and other scripts useful its testing;
-- _TrasformedFiltering_: contains the implementation of the filter and other scripts useful its testing.
+- _TrasformedFiltering_: contains the implementation of the filter and other scripts useful its testing;
+- _images_: contanins both b&w and rgb images;
+- _Utils.py_: script che implementa funzioni utili richiamate negli script dei filtri;
+- _compeare_filters.py_: script to compere the filters altogether.
