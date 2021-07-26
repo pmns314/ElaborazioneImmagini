@@ -144,7 +144,15 @@ def _denoising(image, wname, levels, ch, mode, dim_neigh, show):
         _plot_wavelet_transform(denoised_coeff, ch, False)
 
     # Reconstruct Image
-    return pywt.waverec2(denoised_coeff, wname)
+    de_noised_image = pywt.waverec2(denoised_coeff, wname)
+
+    # Dimensions adjusting
+    if de_noised_image.shape[0] != image.shape[0]:
+        de_noised_image = de_noised_image[:-1, :]
+    if de_noised_image.shape[1] != image.shape[1]:
+        de_noised_image = de_noised_image[:, :-1]
+
+    return de_noised_image
 
 
 def wavelet_denoising(image, wname=DEFAULT_WNAME, levels=None, mode=DEFAULT_MODE, dim_neigh=DEFAULT_LEVEL_NUMBER,
@@ -177,11 +185,6 @@ def wavelet_denoising(image, wname=DEFAULT_WNAME, levels=None, mode=DEFAULT_MODE
         im = np.zeros([*image.shape])
         for c in range(channels):
             res = _denoising(image[:, :, c], wname, levels, c + 1, mode, dim_neigh, show)
-            # Dimensions adjusting
-            if res.shape[0] != image.shape[0]:
-                res = res[:-1, :]
-            if res.shape[1] != image.shape[1]:
-                res = res[:, :-1]
             im[:, :, c] = res
     return im
 
@@ -214,7 +217,7 @@ def plot_images_test(I_original, I_noisy, noisy, I_filtred_univ, I_filtred_neigh
     ax.axes.yaxis.set_ticks([])
 
     plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (
-        evaluate(I_original, I_filtred_univ, False if get_channels_number(I) == 1 else True)), loc="left")
+        evaluate(I_original, I_filtred_univ, False if get_channels_number(I_original) == 1 else True)), loc="left")
 
     # plot immagine filtrata con OpenCV
     fig.add_subplot(2, 2, 4)
@@ -224,12 +227,13 @@ def plot_images_test(I_original, I_noisy, noisy, I_filtred_univ, I_filtred_neigh
     ax.axes.xaxis.set_ticks([])
     ax.axes.yaxis.set_ticks([])
     plt.xlabel("   - MSE: %.2f\n   - PSNR: %.2f\n   - SSIM: %.2f" % (
-        evaluate(I_original, I_filtred_neigh, False if get_channels_number(I) == 1 else True)), loc="left")
+        evaluate(I_original, I_filtred_neigh, False if get_channels_number(I_original) == 1 else True)), loc="left")
 
 
 if __name__ == '__main__':
     print("------------------------- Black and white image --------------------")
-    I = cv2.imread('../images/b&w/totem-poles.tif', -1)
+
+    I = cv2.imread('../images/b&w/cameraman.tif', -1)
     type_noise = Noise.GAUSSIAN
     I_noise = add_noise(I, type_noise)
 
