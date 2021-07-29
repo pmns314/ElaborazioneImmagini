@@ -49,7 +49,7 @@ def guided_filter(I_guid, I_noisy, epsil=0.01, N=3):
 
     :return the filtered image
     """
-    h = np.ones(N) / (pow(N, 2))
+    h = np.ones((N,N)) / (pow(N, 2))
     # perform mean e correlation
     mean_I = cv2.filter2D(I_guid, -1, h, borderType=cv2.BORDER_REPLICATE)
     mean_p = cv2.filter2D(I_noisy, -1, h, borderType=cv2.BORDER_REPLICATE)
